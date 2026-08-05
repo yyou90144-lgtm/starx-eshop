@@ -1,0 +1,31 @@
+# Dependencies & build
+**/node_modules/
+**/dist/
+**/target/
+*.class
+*.jar
+*.war
+*.log
+
+# H2/run-preview expanded Spring Boot layout (keep SQL seeds only)
+eshop-release-v1.0/backend/run-preview/BOOT-INF/
+eshop-release-v1.0/backend/run-preview/META-INF/
+eshop-release-v1.0/backend/run-preview/org/
+
+# Local secrets & runtime data
+.env
+**/.env
+**/data/uploads/
+**/data/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Python local helpers
+**/__pycache__/
+*.pyc
+package-lock.json
