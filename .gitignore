@@ -2,10 +2,13 @@
 **/node_modules/
 **/dist/
 **/target/
+**/build/
 *.class
 *.jar
 *.war
 *.log
+*.apk
+*.aab
 
 # H2/run-preview expanded Spring Boot layout (keep SQL seeds only)
 eshop-release-v1.0/backend/run-preview/BOOT-INF/
@@ -15,17 +18,54 @@ eshop-release-v1.0/backend/run-preview/org/
 # Local secrets & runtime data
 .env
 **/.env
+**/local.properties
 **/data/uploads/
 **/data/
+eshop-release-v1.0/data/
 
-# IDE / OS
+# IDE / OS / agent local
 .idea/
 .vscode/
 *.iml
 .DS_Store
 Thumbs.db
+.impeccable/
+.grok/sessions/
 
-# Python local helpers
+# Personal conversation memory / notes (never upload)
+*对话记忆*
+*对话记忆*.md
+**/对话记忆*
+tmp/
+**/tmp/
+
+# Local scrape / one-off helper scripts at workspace root
+_*.py
+_*.txt
+_*.xml
+
+# Codex / design experiment dumps
+.codex-*.png
+.codex-*.xml
+design-refs/
+tmp/
+
+# Local image/scrape working reports (keep formal security reports only if already tracked)
+security-reports/jd-*
+security-reports/max-*
+security-reports/product-*
+security-reports/watermark-*
+security-reports/android-native-api-tests.json
+security-reports/android-r8-performance-test-*.md
+
+# Python / npm local
 **/__pycache__/
 *.pyc
 package-lock.json
+/node_modules/
+/package.json
+/package-lock.json
+
+# Optional local design meta at monorepo root
+PRODUCT.md
+DESIGN.md

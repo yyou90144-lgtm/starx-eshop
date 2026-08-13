@@ -17,6 +17,10 @@ const props = defineProps({
     type: Number,
     default: 5,
   },
+  showHeader: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const router = useRouter()
@@ -39,6 +43,41 @@ const displayName = (name = '') => name
   .replace(/^演示分类-/, '')
   .replace(/^演示\s*/, '')
   .replace(/^演示/, '')
+
+const numericValue = (...values) => {
+  for (const value of values) {
+    const number = Number(value)
+    if (Number.isFinite(number)) return number
+  }
+  return 0
+}
+
+const fallbackImage = (product) => {
+  const name = `${product?.name || ''} ${product?.subtitle || ''}`
+  if (/耳机|音箱/.test(name)) return '/images/catalog/headphones-studio.jpg'
+  if (/手机|数码/.test(name)) return '/images/catalog/phone-studio.jpg'
+  if (/键盘|鼠标/.test(name)) return '/images/catalog/keyboard-studio.jpg'
+  if (/电脑|笔记本|显示器|硬盘|路由|打印|摄像头/.test(name)) return '/images/catalog/laptop-studio.jpg'
+  if (/台灯|家居|电饭煲|电水壶|吸尘|空气|体脂|插线板|风扇/.test(name)) return '/images/catalog/lamp-studio.jpg'
+  return '/images/catalog/home-studio.jpg'
+}
+
+const imageSource = (product) => {
+  const main = product?.mainImage
+  if (main && !/\/api\/demo\/(?:phone|computer|home)\.svg$/i.test(String(main))) {
+    return main
+  }
+  return fallbackImage(product)
+}
+
+const onImageError = (product) => {
+  const fallback = fallbackImage(product)
+  if (product.mainImage === fallback) {
+    product.imageFailed = true
+    return
+  }
+  product.mainImage = fallback
+}
 
 const loadFallback = async () => {
   const page = await getProducts({ current: 1, size: props.limit })
@@ -66,7 +105,10 @@ const load = async () => {
     const list = await getHotProducts({ days: props.days, limit: props.limit })
     const ranked = (Array.isArray(list) ? list : []).map((item) => ({
       ...item,
-      name: displayName(item.name),
+      productId: item.productId ?? item.id,
+      name: displayName(item.name || item.productName),
+      salesQuantity: numericValue(item.salesQuantity, item.soldQuantity, item.quantity),
+      minPrice: numericValue(item.minPrice, item.price),
       imageFailed: false,
       fallback: false,
     }))
@@ -100,9 +142,8 @@ onMounted(load)
 
 <template>
   <section class="hot-ranking" :class="{ mobile, fallback: usingFallback }">
-    <header>
+    <header v-if="showHeader">
       <div>
-        <span>{{ usingFallback ? 'PICK FOR YOU' : 'HOT RANKING' }}</span>
         <h2>{{ title }}</h2>
       </div>
       <button v-if="errorMessage" type="button" @click="load">重新加载</button>
@@ -124,11 +165,11 @@ onMounted(load)
         <b :class="{ champion: index === 0 }">{{ index + 1 }}</b>
         <span class="product-image">
           <img
-            v-if="product.mainImage && !product.imageFailed"
-            :src="product.mainImage"
+            v-if="!product.imageFailed"
+            :src="imageSource(product)"
             :alt="product.name"
             loading="lazy"
-            @error="product.imageFailed = true"
+            @error="onImageError(product)"
           />
           <span v-else>STARX</span>
         </span>
@@ -152,16 +193,6 @@ onMounted(load)
 <style scoped>
 .hot-ranking {
   margin: 20px 0 8px;
-  padding: 26px 24px 22px;
-  background: #fff;
-  border: 1px solid #ebe4de;
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(28, 20, 16, .04);
-}
-
-.hot-ranking.fallback {
-  background: radial-gradient(circle at 0% 0%, rgba(255, 77, 79, .05), transparent 40%), #fff;
-  border-color: #ebe4de;
 }
 
 .hot-ranking header {
@@ -172,26 +203,14 @@ onMounted(load)
   margin-bottom: 16px;
 }
 
-.hot-ranking header span {
-  color: #ff4d4f;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .14em;
-}
-
-.hot-ranking.fallback header span {
-  color: #ff4d4f;
-}
-
 .hot-ranking h2 {
-  margin: 3px 0 0;
-  color: #1c1917;
+  margin: 0;
+  color: var(--eshop-text);
   font-size: 24px;
-  letter-spacing: -.02em;
 }
 
 .hot-ranking header small {
-  color: #8a837c;
+  color: var(--eshop-muted);
   max-width: 300px;
   text-align: right;
   line-height: 1.4;
@@ -222,17 +241,16 @@ onMounted(load)
   gap: 10px;
   padding: 12px;
   text-align: left;
-  background: #faf7f5;
-  border: 1px solid transparent;
-  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--eshop-border);
+  border-radius: 12px;
   cursor: pointer;
   transition: .2s ease;
 }
 
 .ranking-card:hover {
-  background: #fff;
-  border-color: #ffd6d2;
-  box-shadow: 0 12px 28px rgba(28, 20, 16, .08);
+  border-color: #ffb3a7;
+  box-shadow: 0 12px 28px rgba(21, 46, 79, .08);
   transform: translateY(-3px);
 }
 
@@ -245,8 +263,8 @@ onMounted(load)
   width: 24px;
   height: 24px;
   color: #fff;
-  background: #c4bbb2;
-  border-radius: 8px;
+  background: #94a3b8;
+  border-radius: 6px;
   font-size: 12px;
   place-items: center;
 }
@@ -261,9 +279,9 @@ onMounted(load)
   height: 120px;
   place-items: center;
   overflow: hidden;
-  color: #ffccc7;
-  background: #f3ece6;
-  border-radius: 12px;
+  color: #9bb2cf;
+  background: #edf3f8;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 800;
 }
@@ -283,7 +301,7 @@ onMounted(load)
 
 .product-info strong {
   overflow: hidden;
-  color: #1c1917;
+  color: var(--eshop-text);
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -291,7 +309,7 @@ onMounted(load)
 
 .product-info small {
   margin: 4px 0;
-  color: #8a837c;
+  color: var(--eshop-muted);
   font-size: 11px;
 }
 
@@ -336,8 +354,6 @@ onMounted(load)
 
 .hot-ranking.mobile {
   margin: 8px 12px;
-  padding: 14px;
-  border-radius: 14px;
 }
 
 .hot-ranking.mobile header {

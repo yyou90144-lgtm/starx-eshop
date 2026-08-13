@@ -14,12 +14,12 @@ const logout = async () => {
 
 <template>
   <el-container class="admin-shell seller-shell">
-    <el-aside width="220px" class="admin-aside">
-      <h1><span>E</span>-Shop 商家</h1>
-      <el-menu router :default-active="route.path">
+    <el-aside width="236px" class="admin-aside">
+      <h1><span>S</span>TARX 运营</h1>
+      <el-menu router :default-active="route.path" class="workspace-menu">
         <el-menu-item index="/">统一入口</el-menu-item>
         <el-menu-item v-if="auth.isAdmin" index="/admin/users">平台账号管理</el-menu-item>
-        <el-menu-item index="/seller">经营看板</el-menu-item>
+        <el-menu-item index="/seller">运营看板</el-menu-item>
         <el-menu-item index="/seller/categories">分类管理</el-menu-item>
         <el-menu-item index="/seller/products">商品与 SKU</el-menu-item>
         <el-menu-item index="/seller/inventory">库存预警</el-menu-item>
@@ -31,8 +31,8 @@ const logout = async () => {
     <el-container class="admin-workspace">
       <el-header class="admin-header">
         <div>
-          <b>{{ route.meta.title || '商家运营工作台' }}</b>
-          <span>商家账号：{{ auth.user?.nickname }}</span>
+          <b>{{ route.meta.title || '商城运营工作台' }}</b>
+          <span>运营账号：{{ auth.user?.nickname }}</span>
         </div>
         <div class="admin-header-actions">
           <el-button @click="router.push('/')">切换入口</el-button>

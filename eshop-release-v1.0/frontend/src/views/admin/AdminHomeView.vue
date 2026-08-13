@@ -15,12 +15,31 @@ const hotLoading = ref(false)
 const hotProducts = ref([])
 const trendLoading = ref(false)
 const salesTrend = ref([])
+const trendError = ref('')
 const topLoading = ref(false)
 const topProducts = ref([])
+const topError = ref('')
+const hotError = ref('')
 
 const maxTrendOrders = computed(() => (
   Math.max(1, ...salesTrend.value.map((point) => Number(point.orderCount) || 0), 1)
 ))
+
+const numericValue = (...values) => {
+  for (const value of values) {
+    const number = Number(value)
+    if (Number.isFinite(number)) return number
+  }
+  return 0
+}
+
+const normalizeHotProduct = (item) => ({
+  ...item,
+  productId: item.productId ?? item.id,
+  salesQuantity: numericValue(item.salesQuantity, item.soldQuantity, item.quantity),
+  salesAmount: numericValue(item.salesAmount, item.totalSalesAmount, item.amount),
+  totalStock: numericValue(item.totalStock, item.stock),
+})
 
 const loadSummary = async () => {
   if (loading.value) return
@@ -38,11 +57,13 @@ const loadSummary = async () => {
 const loadSalesTrend = async () => {
   if (trendLoading.value) return
   trendLoading.value = true
+  trendError.value = ''
   try {
     const data = await getDashboardSalesTrend(7)
     salesTrend.value = Array.isArray(data?.points) ? data.points : []
-  } catch {
+  } catch (error) {
     salesTrend.value = []
+    trendError.value = error.message || '销售趋势加载失败'
   } finally {
     trendLoading.value = false
   }
@@ -51,11 +72,13 @@ const loadSalesTrend = async () => {
 const loadTopProducts = async () => {
   if (topLoading.value) return
   topLoading.value = true
+  topError.value = ''
   try {
     const data = await getDashboardTopProducts(10)
     topProducts.value = Array.isArray(data?.items) ? data.items : []
-  } catch {
+  } catch (error) {
     topProducts.value = []
+    topError.value = error.message || '销量排行加载失败'
   } finally {
     topLoading.value = false
   }
@@ -64,10 +87,13 @@ const loadTopProducts = async () => {
 const loadHotProducts = async () => {
   if (hotLoading.value) return
   hotLoading.value = true
+  hotError.value = ''
   try {
-    hotProducts.value = await getHotProducts({ days: 30, limit: 5 })
-  } catch {
+    const data = await getHotProducts({ days: 30, limit: 5 })
+    hotProducts.value = (Array.isArray(data) ? data : []).map(normalizeHotProduct)
+  } catch (error) {
     hotProducts.value = []
+    hotError.value = error.message || '热销商品加载失败'
   } finally {
     hotLoading.value = false
   }
@@ -103,6 +129,33 @@ const overviewCards = computed(() => [
     value: formatMoney(summary.value?.paidSalesAmount),
     note: '已支付、已发货和已完成订单',
     tone: 'emerald',
+  },
+])
+
+const priorityActions = computed(() => [
+  {
+    label: '确认待发货订单',
+    value: summary.value?.paidOrderCount ?? 0,
+    note: '支付已完成，订单可以进入发货处理。',
+    action: '处理订单',
+    to: { path: '/seller/orders', query: { status: 'PAID' } },
+    tone: 'primary',
+  },
+  {
+    label: '检查低库存 SKU',
+    value: summary.value?.lowStockSkuCount ?? 0,
+    note: '只显示在售且启用的 SKU。',
+    action: '查看预警',
+    to: '/seller/inventory',
+    tone: 'warning',
+  },
+  {
+    label: '跟进运输中订单',
+    value: summary.value?.shippedOrderCount ?? 0,
+    note: '等待消费者确认收货。',
+    action: '查看订单',
+    to: { path: '/seller/orders', query: { status: 'SHIPPED' } },
+    tone: 'neutral',
   },
 ])
 
@@ -148,9 +201,8 @@ onMounted(refreshAll)
   <section class="admin-dashboard">
     <header class="dashboard-hero">
       <div>
-        <p>SELLER CENTER · LIVE OVERVIEW</p>
-        <h1>商家运营控制台</h1>
-        <span>实时查看买家、商品、订单与有效销售额，快速进入日常经营模块。</span>
+        <h1>商城运营控制台</h1>
+        <span>实时查看商城买家、商品、订单与有效销售额，快速进入日常运营模块。</span>
       </div>
       <div class="hero-actions">
         <small v-if="summary?.generatedAt">
@@ -180,6 +232,31 @@ onMounted(refreshAll)
       </template>
     </el-alert>
 
+    <section class="action-queue" :aria-busy="loading">
+      <div class="section-heading">
+        <div>
+          <h2>需要处理</h2>
+          <span>优先处理会影响履约与库存的事项。</span>
+        </div>
+      </div>
+      <div class="queue-grid">
+        <RouterLink
+          v-for="item in priorityActions"
+          :key="item.label"
+          :to="item.to"
+          class="queue-item"
+          :class="`queue-${item.tone}`"
+        >
+          <div>
+            <span>{{ item.label }}</span>
+            <small>{{ item.note }}</small>
+          </div>
+          <strong>{{ loading && !summary ? '-' : item.value }}</strong>
+          <em>{{ item.action }}</em>
+        </RouterLink>
+      </div>
+    </section>
+
     <div class="overview-grid" :aria-busy="loading">
       <article
         v-for="card in overviewCards"
@@ -196,10 +273,9 @@ onMounted(refreshAll)
     <section class="order-overview">
       <div class="section-heading">
         <div>
-          <p>ORDER PIPELINE</p>
           <h2>订单状态分布</h2>
         </div>
-        <RouterLink to="/seller/orders">处理订单 →</RouterLink>
+        <RouterLink to="/seller/orders">处理订单</RouterLink>
       </div>
       <div class="status-grid">
         <div
@@ -217,11 +293,14 @@ onMounted(refreshAll)
     <section class="trend-overview">
       <div class="section-heading">
         <div>
-          <p>SALES TREND</p>
           <h2>近 7 日销售趋势</h2>
         </div>
       </div>
       <div v-loading="trendLoading" class="trend-table">
+        <div v-if="!trendLoading && trendError" class="compact-empty compact-error">
+          <span>{{ trendError }}</span>
+          <el-button link type="primary" @click="loadSalesTrend">重新加载</el-button>
+        </div>
         <div v-for="point in salesTrend" :key="point.date" class="trend-row">
           <span class="trend-date">{{ point.date }}</span>
           <div class="trend-bar-wrap" :title="`订单 ${point.orderCount}`">
@@ -230,23 +309,22 @@ onMounted(refreshAll)
           <span><small>订单</small><strong>{{ point.orderCount }}</strong></span>
           <span><small>销售额</small><strong>{{ formatMoney(point.salesAmount) }}</strong></span>
         </div>
-        <el-empty
-          v-if="!trendLoading && !salesTrend.length"
-          description="暂无趋势数据"
-          :image-size="70"
-        />
+        <div v-if="!trendLoading && !trendError && !salesTrend.length" class="compact-empty">暂无趋势数据</div>
       </div>
     </section>
 
     <section class="hot-overview">
       <div class="section-heading">
         <div>
-          <p>TOP PRODUCTS</p>
           <h2>销量 Top 商品</h2>
         </div>
-        <RouterLink to="/seller/products">管理商品 →</RouterLink>
+        <RouterLink to="/seller/products">管理商品</RouterLink>
       </div>
       <div v-loading="topLoading" class="hot-table">
+        <div v-if="!topLoading && topError" class="compact-empty compact-error">
+          <span>{{ topError }}</span>
+          <el-button link type="primary" @click="loadTopProducts">重新加载</el-button>
+        </div>
         <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row">
           <b>{{ index + 1 }}</b>
           <span>
@@ -256,23 +334,22 @@ onMounted(refreshAll)
           <span><small>销量</small><strong>{{ product.soldQuantity }} 件</strong></span>
           <span><small>销售额</small><strong>{{ formatMoney(product.salesAmount) }}</strong></span>
         </div>
-        <el-empty
-          v-if="!topLoading && !topProducts.length"
-          description="暂无销量排行"
-          :image-size="70"
-        />
+        <div v-if="!topLoading && !topError && !topProducts.length" class="compact-empty">暂无销量排行</div>
       </div>
     </section>
 
     <section class="hot-overview">
       <div class="section-heading">
         <div>
-          <p>TOP SELLING</p>
           <h2>近 30 天热销商品</h2>
         </div>
-        <RouterLink to="/seller/products">管理商品 →</RouterLink>
+        <RouterLink to="/seller/products">管理商品</RouterLink>
       </div>
       <div v-loading="hotLoading" class="hot-table">
+        <div v-if="!hotLoading && hotError" class="compact-empty compact-error">
+          <span>{{ hotError }}</span>
+          <el-button link type="primary" @click="loadHotProducts">重新加载</el-button>
+        </div>
         <div v-for="(product, index) in hotProducts" :key="product.productId" class="hot-row">
           <b>{{ index + 1 }}</b>
           <span>
@@ -283,39 +360,34 @@ onMounted(refreshAll)
           <span><small>销售额</small><strong>{{ formatMoney(product.salesAmount) }}</strong></span>
           <span><small>可售库存</small><strong>{{ product.totalStock }}</strong></span>
         </div>
-        <el-empty
-          v-if="!hotLoading && !hotProducts.length"
-          description="暂无有效销售数据"
-          :image-size="70"
-        />
+        <div v-if="!hotLoading && !hotError && !hotProducts.length" class="compact-empty">暂无有效销售数据</div>
       </div>
     </section>
 
     <section class="quick-entry">
       <div class="section-heading">
         <div>
-          <p>QUICK ENTRY</p>
           <h2>快捷管理</h2>
         </div>
       </div>
       <div class="entry-grid">
         <RouterLink to="/seller/categories">
-          <b>01</b><h3>分类管理</h3><p>维护分类结构、排序与启用状态。</p><span>进入管理 →</span>
+          <h3>分类管理</h3><p>维护分类结构、排序与启用状态。</p><span>进入管理</span>
         </RouterLink>
         <RouterLink to="/seller/products">
-          <b>02</b><h3>商品与 SKU</h3><p>维护商品、规格、价格与库存。</p><span>进入管理 →</span>
+          <h3>商品与 SKU</h3><p>维护商品、规格、价格与库存。</p><span>进入管理</span>
         </RouterLink>
         <RouterLink to="/seller/inventory">
-          <b>03</b><h3>库存预警</h3><p>定位在售商品的低库存和缺货 SKU。</p><span>查看预警 →</span>
+          <h3>库存预警</h3><p>定位在售商品的低库存和缺货 SKU。</p><span>查看预警</span>
         </RouterLink>
         <RouterLink to="/seller/orders">
-          <b>04</b><h3>订单管理</h3><p>查询订单并完成发货与取消操作。</p><span>进入管理 →</span>
+          <h3>订单管理</h3><p>查询订单并完成发货与取消操作。</p><span>进入管理</span>
         </RouterLink>
         <RouterLink to="/seller/logs">
-          <b>05</b><h3>操作日志</h3><p>审计商家工作台关键业务操作结果。</p><span>查看日志 →</span>
+          <h3>操作日志</h3><p>审计商家工作台关键业务操作结果。</p><span>查看日志</span>
         </RouterLink>
         <RouterLink to="/seller/reviews">
-          <b>06</b><h3>评价管理</h3><p>查看消费者评价并处理不适合公开展示的内容。</p><span>审核评价 →</span>
+          <h3>评价管理</h3><p>查看消费者评价并处理不适合公开展示的内容。</p><span>审核评价</span>
         </RouterLink>
       </div>
     </section>
@@ -334,6 +406,18 @@ onMounted(refreshAll)
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
+}
+
+/* The trend is a compact factual comparison, not a decorative chart treatment. */
+.trend-bar-wrap {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+}
+
+.trend-bar-wrap i {
+  background: #e5484d;
+  border-radius: inherit;
 }
 
 .trend-table {
@@ -377,29 +461,6 @@ onMounted(refreshAll)
 .trend-row strong {
   color: #0f172a;
   font-size: 14px;
-}
-
-.dashboard-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  padding: 32px 36px;
-  color: #fff;
-  background:
-    radial-gradient(circle at 88% 12%, rgba(96, 165, 250, 0.35), transparent 28%),
-    linear-gradient(125deg, #0f172a, #1e3a8a 65%, #2563eb);
-  border-radius: 20px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
-}
-
-.dashboard-hero p,
-.section-heading p {
-  margin: 0 0 8px;
-  color: #93c5fd;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
 }
 
 .dashboard-hero h1 {
@@ -493,7 +554,21 @@ onMounted(refreshAll)
 }
 
 .hot-table {
-  min-height: 90px;
+  min-height: 0;
+}
+
+.compact-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 10px;
+  color: #68788e;
+  font-size: 13px;
+}
+
+.compact-error span {
+  color: #b42318;
 }
 
 .hot-row {
@@ -547,10 +622,6 @@ onMounted(refreshAll)
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 18px;
-}
-
-.section-heading p {
-  color: #3b82f6;
 }
 
 .section-heading h2 {
@@ -617,11 +688,6 @@ onMounted(refreshAll)
   transform: translateY(-2px);
 }
 
-.entry-grid b {
-  color: #bfdbfe;
-  font-size: 32px;
-}
-
 .entry-grid h3 {
   margin: 10px 0 6px;
   color: #0f172a;
@@ -640,6 +706,342 @@ onMounted(refreshAll)
   font-weight: 700;
 }
 
+/* The workbench keeps current actions in a single scan line before reporting. */
+.dashboard-hero {
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 0 20px;
+  color: #16243a;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dashboard-hero h1 {
+  margin: 0 0 6px;
+  color: #16243a;
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.dashboard-hero span {
+  color: #68788e;
+  font-size: 13px;
+}
+
+.hero-actions {
+  align-items: flex-end;
+}
+
+.hero-actions small {
+  color: #68788e;
+}
+
+.action-queue {
+  margin-bottom: 18px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+}
+
+.action-queue .section-heading {
+  align-items: flex-end;
+  margin: 0;
+  padding: 18px 20px 12px;
+}
+
+.action-queue .section-heading h2 {
+  margin-bottom: 3px;
+  font-size: 18px;
+}
+
+.action-queue .section-heading span {
+  color: #68788e;
+  font-size: 13px;
+}
+
+.queue-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  border-top: 1px solid #e9eef4;
+}
+
+.queue-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  min-height: 106px;
+  padding: 18px 20px;
+  color: #16243a;
+  border-right: 1px solid #e9eef4;
+  transition: background-color .18s ease;
+}
+
+.queue-item:last-child {
+  border-right: 0;
+}
+
+.queue-item:hover {
+  background: #fff7f6;
+}
+
+.queue-item > div {
+  display: grid;
+  gap: 5px;
+}
+
+.queue-item span {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.queue-item small {
+  color: #68788e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.queue-item strong {
+  align-self: start;
+  color: #16243a;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.queue-item em {
+  grid-column: 1 / -1;
+  color: #ff4d4f;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.queue-warning strong {
+  color: #b7791f;
+}
+
+.overview-grid {
+  gap: 0;
+  margin-top: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+}
+
+.overview-card {
+  min-height: 124px;
+  padding: 20px;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid #e9eef4;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.overview-card:last-child {
+  border-right: 0;
+}
+
+.overview-card::after {
+  display: none;
+}
+
+.overview-card > span {
+  color: #68788e;
+  font-size: 12px;
+}
+
+.overview-card strong {
+  margin: 11px 0 7px;
+  color: #16243a;
+  font-size: 27px;
+}
+
+.overview-card small {
+  color: #68788e;
+  font-size: 12px;
+}
+
+.tone-red,
+.tone-amber {
+  color: #ff4d4f;
+}
+
+.tone-blue,
+.tone-violet {
+  color: #746f68;
+}
+
+.tone-amber {
+  color: #b87712;
+}
+
+.tone-red {
+  color: #e5484d;
+}
+
+.tone-emerald {
+  color: #38845b;
+}
+
+.order-overview,
+.trend-overview,
+.hot-overview,
+.quick-entry {
+  margin-top: 18px;
+  padding: 20px;
+  border-color: #dce5ef;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.section-heading {
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.section-heading h2 {
+  color: #16243a;
+  font-size: 18px;
+}
+
+.section-heading a {
+  color: #ff4d4f;
+  font-size: 13px;
+}
+
+.status-grid {
+  gap: 0;
+  border-top: 1px solid #e9eef4;
+}
+
+.status-item {
+  padding: 15px 16px;
+  background: transparent;
+  border-left: 0;
+  border-right: 1px solid #e9eef4;
+  border-radius: 0;
+}
+
+.status-item:last-child {
+  border-right: 0;
+}
+
+.status-item span {
+  color: #68788e;
+  font-size: 12px;
+}
+
+.status-item strong {
+  margin-top: 6px;
+  color: #16243a;
+  font-size: 22px;
+}
+
+.status-item.primary {
+  color: #e5484d;
+}
+
+.hot-row {
+  padding: 13px 10px;
+  border-color: #e9eef4;
+}
+
+.hot-row > b {
+  width: 26px;
+  height: 26px;
+  color: #ff4d4f;
+  background: #fff1f0;
+  border-radius: 6px;
+}
+
+.entry-grid {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #e9eef4;
+  border-radius: 8px;
+}
+
+.entry-grid a {
+  min-height: 150px;
+  padding: 18px;
+  background: #fff;
+  border: 0;
+  border-right: 1px solid #e9eef4;
+  border-bottom: 1px solid #e9eef4;
+  border-radius: 0;
+}
+
+.entry-grid a:hover {
+  background: #fff7f6;
+  border-color: #e9eef4;
+  box-shadow: none;
+  transform: none;
+}
+
+.entry-grid h3 {
+  color: #16243a;
+}
+
+.entry-grid p {
+  color: #68788e;
+}
+
+.entry-grid span {
+  color: #ff4d4f;
+}
+
+.action-queue,
+.overview-grid,
+.order-overview,
+.trend-overview,
+.hot-overview,
+.quick-entry,
+.entry-grid {
+  border-color: #e2e1dd;
+}
+
+.queue-grid,
+.status-grid {
+  border-color: #e2e1dd;
+}
+
+.queue-item,
+.overview-card,
+.status-item,
+.entry-grid a {
+  border-color: #e2e1dd;
+}
+
+.queue-item:hover,
+.entry-grid a:hover {
+  background: #fff5f4;
+  border-color: #e2e1dd;
+}
+
+.hot-row {
+  border-color: #efefeb;
+}
+
+.hot-row > b {
+  color: #c83b40;
+  background: #fff1f0;
+}
+
+.trend-bar-wrap {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+}
+
+.trend-bar-wrap i {
+  background: #e5484d;
+  border-radius: inherit;
+}
+
 @media (max-width: 1100px) {
   .overview-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -647,6 +1049,21 @@ onMounted(refreshAll)
 
   .entry-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .queue-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .queue-item,
+  .queue-item:last-child {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #e9eef4;
+  }
+
+  .queue-item:last-child {
+    border-bottom: 0;
   }
 }
 

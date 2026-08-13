@@ -3,71 +3,72 @@
  * 白底 + 品牌红强调，覆盖 PC / H5 / 管理端，去掉教学演示的深色玻璃风。
  */
 html:root {
-  /* STARX retail design system */
-  --eshop-bg: #f7f4f1;
-  --eshop-bg-deep: #efe9e4;
+  /* STARX modern retail design system */
+  --eshop-bg: #f5f5f2;
+  --eshop-bg-deep: #ecece8;
   --eshop-surface: #ffffff;
   --eshop-surface-solid: #ffffff;
-  --eshop-surface-soft: #faf7f5;
-  --eshop-border: #ebe4de;
-  --eshop-border-hover: #ffb3a7;
-  --eshop-text: #1c1917;
-  --eshop-text-soft: #3f3a36;
-  --eshop-muted: #8a837c;
-  --eshop-primary: #ff4d4f;
-  --eshop-primary-strong: #e03638;
+  --eshop-surface-soft: #fafaf8;
+  --eshop-border: #e2e1dd;
+  --eshop-border-hover: #b6b3ad;
+  --eshop-text: #252422;
+  --eshop-text-soft: #45433f;
+  --eshop-muted: #746f68;
+  --eshop-primary: #e5484d;
+  --eshop-primary-strong: #c83b40;
   --eshop-primary-soft: #fff1f0;
-  --eshop-accent: #ff6b4a;
-  --eshop-success: #3d9a5f;
-  --eshop-warning: #d4920a;
-  --eshop-danger: #ff4d4f;
-  --eshop-ink: #1c1917;
-  --eshop-cream: #f3ece6;
-  --eshop-shadow: 0 12px 36px rgba(28, 20, 16, .06);
-  --eshop-shadow-sm: 0 4px 16px rgba(28, 20, 16, .04);
-  --eshop-radius: 14px;
-  --eshop-radius-lg: 18px;
+  --eshop-accent: #e5484d;
+  --eshop-success: #38845b;
+  --eshop-warning: #b87712;
+  --eshop-danger: #e5484d;
+  --eshop-ink: #242321;
+  --eshop-cream: #efefeb;
+  --eshop-spectrum: linear-gradient(100deg, #e5484d 0%, #e58c38 24%, #70a24b 48%, #328bb0 72%, #7659a7 100%);
+  --eshop-shadow: 0 12px 30px rgba(37, 36, 34, .07);
+  --eshop-shadow-sm: 0 4px 14px rgba(37, 36, 34, .045);
+  --eshop-radius: 10px;
+  --eshop-radius-lg: 14px;
   --eshop-header-height: 108px;
   --eshop-container: 1280px;
 
-  --el-color-primary: #ff4d4f;
-  --el-color-primary-light-3: #ff7875;
-  --el-color-primary-light-5: #ffa39e;
-  --el-color-primary-light-7: #ffccc7;
-  --el-color-primary-light-8: #ffe1df;
+  --el-color-primary: #e5484d;
+  --el-color-primary-light-3: #ef7679;
+  --el-color-primary-light-5: #f59b9e;
+  --el-color-primary-light-7: #fac9ca;
+  --el-color-primary-light-8: #fde0e0;
   --el-color-primary-light-9: #fff1f0;
-  --el-color-primary-dark-2: #cf1322;
+  --el-color-primary-dark-2: #b83236;
   --el-bg-color: #ffffff;
-  --el-bg-color-page: #f7f4f1;
+  --el-bg-color-page: #f5f5f2;
   --el-bg-color-overlay: #ffffff;
-  --el-fill-color: #f7f4f1;
-  --el-fill-color-light: #faf7f5;
-  --el-fill-color-lighter: #faf7f5;
-  --el-fill-color-extra-light: #fcfbfa;
+  --el-fill-color: #f5f5f2;
+  --el-fill-color-light: #fafaf8;
+  --el-fill-color-lighter: #fafaf8;
+  --el-fill-color-extra-light: #fdfdfc;
   --el-fill-color-blank: #ffffff;
-  --el-border-color: #ebe4de;
-  --el-border-color-light: #f0ebe6;
-  --el-border-color-lighter: #f3eee9;
-  --el-border-color-extra-light: #f7f4f1;
-  --el-text-color-primary: #1c1917;
-  --el-text-color-regular: #3f3a36;
-  --el-text-color-secondary: #8a837c;
-  --el-text-color-placeholder: #b8b0a8;
-  --el-mask-color: rgba(28, 25, 23, .45);
-  --el-mask-color-extra-light: rgba(28, 25, 23, .28);
+  --el-border-color: #e2e1dd;
+  --el-border-color-light: #ebeae7;
+  --el-border-color-lighter: #f1f0ed;
+  --el-border-color-extra-light: #f7f7f5;
+  --el-text-color-primary: #252422;
+  --el-text-color-regular: #45433f;
+  --el-text-color-secondary: #746f68;
+  --el-text-color-placeholder: #aaa6a0;
+  --el-mask-color: rgba(36, 35, 33, .42);
+  --el-mask-color-extra-light: rgba(36, 35, 33, .24);
 
   --van-primary-color: #ff4d4f;
   --van-success-color: #3d9a5f;
   --van-warning-color: #d4920a;
   --van-danger-color: #ff4d4f;
-  --van-text-color: #1c1917;
-  --van-text-color-2: #5c564f;
-  --van-text-color-3: #8a837c;
-  --van-active-color: #f3ece6;
-  --van-border-color: #ebe4de;
-  --van-background: #f7f4f1;
+  --van-text-color: #252422;
+  --van-text-color-2: #5e5a55;
+  --van-text-color-3: #817c75;
+  --van-active-color: #f1f0ed;
+  --van-border-color: #e4e2de;
+  --van-background: #f5f5f2;
   --van-background-2: #ffffff;
-  --van-background-3: #faf7f5;
+  --van-background-3: #f7f9fc;
 }
 
 html,
@@ -116,7 +117,7 @@ body .pc-shell {
 }
 
 body .pc-topbar {
-  background: #1c1917;
+  background: var(--eshop-ink);
   color: rgba(255, 255, 255, .78);
   font-size: 12px;
 }
@@ -156,10 +157,9 @@ body .pc-header-main {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(255, 255, 255, .96);
+  background: #fff;
   border-bottom: 1px solid var(--eshop-border);
-  box-shadow: 0 8px 28px rgba(28, 20, 16, .04);
-  backdrop-filter: saturate(1.2) blur(10px);
+  box-shadow: 0 8px 28px rgba(21, 46, 79, .05);
 }
 
 body .pc-header-inner {
@@ -192,7 +192,6 @@ body .pc-brand-mark {
   border-radius: 12px;
   font-size: 18px;
   font-weight: 800;
-  letter-spacing: -.04em;
   box-shadow: 0 10px 24px rgba(255, 77, 79, .22);
 }
 
@@ -204,7 +203,6 @@ body .pc-brand-text {
 
 body .pc-brand-text strong {
   font-size: 22px;
-  letter-spacing: .02em;
 }
 
 body .pc-brand-text small {
@@ -274,7 +272,6 @@ body .pc-search-btn {
   background: var(--eshop-primary);
   font-size: 14px;
   font-weight: 700;
-  letter-spacing: .04em;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -359,7 +356,7 @@ body .pc-cart-badge {
 }
 
 body .pc-nav {
-  border-top: 1px solid #f0f1f3;
+  border-top: 1px solid #eef2f7;
   background: #fff;
 }
 
@@ -483,7 +480,7 @@ body .pc-footer-bottom {
   justify-content: space-between;
   gap: 16px;
   padding-top: 18px;
-  border-top: 1px solid #f0f1f3;
+  border-top: 1px solid #eef2f7;
   color: #bfbfbf;
   font-size: 12px;
 }
@@ -562,11 +559,11 @@ body .admin-main {
 /* —— Mobile —— */
 body .mobile-shell {
   --van-nav-bar-background: #ffffff;
-  --van-nav-bar-title-text-color: #1a1a1a;
-  --van-nav-bar-icon-color: #ff4d4f;
+  --van-nav-bar-title-text-color: #252422;
+  --van-nav-bar-icon-color: #e5484d;
   --van-tabbar-background: #ffffff;
-  --van-tabbar-item-text-color: #8c8c8c;
-  --van-tabbar-item-active-color: #ff4d4f;
+  --van-tabbar-item-text-color: #746f68;
+  --van-tabbar-item-active-color: #e5484d;
   --van-tabbar-item-active-background: #ffffff;
   background: var(--eshop-bg);
 }
@@ -609,7 +606,6 @@ body .pc-main :is(
   .history-content,
   .product-reviews,
   .history-item,
-  .hot-ranking,
   .ranking-card
 ),
 body .admin-main :is(
@@ -693,11 +689,6 @@ body :is(.pc-main, .mobile-main) .payment-card.success {
   border-color: #b7eb8f !important;
 }
 
-body .admin-main .status-item.warning { border-left: 3px solid #faad14 !important; }
-body .admin-main .status-item.primary { border-left: 3px solid #ff4d4f !important; }
-body .admin-main .status-item.success,
-body .admin-main .status-item.completed { border-left: 3px solid #52c41a !important; }
-
 body .mobile-main > section {
   color: var(--eshop-text-soft);
   background: transparent !important;
@@ -718,7 +709,6 @@ body .mobile-main :is(
   .product-card,
   .product-reviews,
   .history-item,
-  .hot-ranking,
   .ranking-card,
   .block
 ) {
@@ -845,6 +835,17 @@ body .el-pagination.is-background .el-pager li.is-active {
   background-color: #ff4d4f !important;
 }
 
+body .mobile-shell .van-tabbar-item--active,
+body .mobile-shell .van-tabbar-item--active .van-tabbar-item__icon,
+body .mobile-shell .van-tabbar-item--active .van-tabbar-item__text,
+body .mobile-shell .van-tab--active {
+  color: var(--eshop-primary) !important;
+}
+
+body .mobile-shell .van-tabs__line {
+  background-color: var(--eshop-primary) !important;
+}
+
 @media (max-width: 960px) {
   body .pc-header-inner {
     grid-template-columns: 1fr auto;
@@ -887,4 +888,217 @@ body .el-pagination.is-background .el-pager li.is-active {
   body .pc-action-btn span.label {
     display: none;
   }
+}
+
+/* Modern retail refinement: quiet material surfaces and one deliberate action color. */
+body {
+  background: var(--eshop-bg);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+body .pc-topbar {
+  background: var(--eshop-ink);
+}
+
+body .pc-header-main {
+  box-shadow: none;
+}
+
+body .pc-brand-mark,
+body .pc-action-btn.primary {
+  box-shadow: none;
+}
+
+body .pc-search {
+  border-width: 1px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+body .pc-search-btn,
+body .pc-action-btn,
+body .pc-brand-mark,
+body .pc-footer-brand span {
+  border-radius: 8px;
+}
+
+body .pc-nav-inner a,
+body .pc-nav-inner .pc-nav-link {
+  color: var(--eshop-text-soft);
+}
+
+body .pc-footer {
+  background: var(--eshop-surface-soft);
+}
+
+body .pc-main :is(
+  .filter-panel,
+  .detail-card,
+  .description-card,
+  .cart-card,
+  .checkout-section,
+  .address-card,
+  .add-card,
+  .order-card,
+  .payment-card,
+  .payment-receipt,
+  .profile-card,
+  .favorites-content,
+  .history-content,
+  .product-reviews,
+  .history-item,
+  .ranking-card
+) {
+  box-shadow: none;
+  border-radius: var(--eshop-radius);
+}
+
+body .pc-main .product-card,
+body .pc-main .ranking-card {
+  box-shadow: none;
+  border-radius: var(--eshop-radius);
+}
+
+body .pc-main .product-card:hover,
+body .pc-main .ranking-card:hover {
+  border-color: #d2cfca !important;
+  box-shadow: 0 12px 26px rgba(37, 36, 34, .09);
+  transform: translateY(-2px);
+}
+
+body .mobile-shell .van-nav-bar,
+body .mobile-tabbar {
+  box-shadow: none;
+}
+
+body .mobile-main :is(
+  .card,
+  .cart-item,
+  .cart-addr-bar,
+  .address-card,
+  .history-card,
+  .favorite-card,
+  .checkout-card,
+  .payment-card,
+  .payment-receipt,
+  .order-card,
+  .state-card,
+  .product-card,
+  .product-reviews,
+  .history-item,
+  .ranking-card,
+  .block
+) {
+  box-shadow: none;
+  border-radius: var(--eshop-radius);
+}
+
+body .auth-page {
+  background: var(--eshop-bg);
+}
+
+body .auth-card,
+body .auth-form-card {
+  box-shadow: 0 16px 34px rgba(37, 36, 34, .08) !important;
+}
+
+body .admin-shell {
+  --admin-ink: #292826;
+  --admin-text: #292826;
+  --admin-muted: #78736c;
+  --admin-page: #f4f4f1;
+  --admin-surface: #ffffff;
+  --admin-surface-soft: #fafaf8;
+  --admin-line: #e2e1dd;
+  --admin-primary: #e5484d;
+  --admin-primary-strong: #c83b40;
+}
+
+body .admin-shell .admin-aside {
+  background: var(--admin-ink);
+  border-right-color: #363432;
+  box-shadow: none;
+}
+
+body .admin-aside .el-menu-item.is-active {
+  box-shadow: none;
+}
+
+body .admin-header {
+  background: rgba(255, 255, 255, .98);
+  box-shadow: none;
+}
+
+body .admin-main :is(
+  .filter-card,
+  .table-card,
+  .overview-card,
+  .trend-overview,
+  .quick-entry,
+  .status-item,
+  .summary-grid article,
+  .entry-grid a,
+  .detail-card
+) {
+  box-shadow: none;
+  border-radius: 8px;
+}
+
+body .admin-main :is(.overview-card, .entry-grid a, .summary-grid article):hover {
+  box-shadow: 0 10px 22px rgba(37, 36, 34, .08);
+  transform: translateY(-1px);
+}
+
+/* The spectrum is a signature for hierarchy, never a replacement for functional color. */
+body .pc-main :is(
+  .home-intro h1,
+  .catalog-heading h1,
+  .product-heading h1,
+  .page-heading h1,
+  .profile-heading h2,
+  .history-heading h1,
+  .favorites-heading h1
+),
+body .admin-main :is(
+  .dashboard-hero h1,
+  .admin-page-heading h1
+) {
+  color: transparent !important;
+  background: var(--eshop-spectrum);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body .mobile-main :is(
+  .profile-heading h2,
+  .page-heading h1,
+  .result-heading strong
+) {
+  color: transparent !important;
+  background: var(--eshop-spectrum);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body .mobile-shell .van-nav-bar__title {
+  color: transparent !important;
+  background: var(--eshop-spectrum);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body .pc-brand-text strong,
+body .pc-footer-brand,
+body .admin-aside h1 {
+  background: var(--eshop-spectrum);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body .admin-aside h1 span {
+  -webkit-text-fill-color: #e5484d;
 }

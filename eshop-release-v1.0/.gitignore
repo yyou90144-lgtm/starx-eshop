@@ -14,3 +14,10 @@ data/
 .idea/
 .vscode/
 *.iml
+
+# Android
+android/.gradle/
+android/local.properties
+android/**/build/
+android/*.apk
+android/*.aab

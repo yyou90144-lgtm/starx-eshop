@@ -84,10 +84,18 @@ watch(
 </script>
 
 <template>
+  <!--
+    THESIS: STARX is a retail service desk where product truth stays visible.
+    OWN-WORLD: cool white surfaces, deep navy structure, one red action color.
+    STORY: shoppers move from a category signal to a product decision and checkout.
+    FIRST VIEWPORT: compact utility bar, one-line search header, category navigation.
+    FORM: navigation-grade retail shelf, assigned direction seed 78798ae1.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
   <div class="pc-shell">
     <div class="pc-topbar">
       <div class="pc-topbar-inner">
-        <span>正品保障 · 极速发货 · 售后可追溯</span>
+        <span>SKU 规格 · 库存状态 · 订单进度</span>
         <div class="pc-topbar-links">
           <template v-if="auth.isLoggedIn">
             <span>你好，{{ auth.user?.nickname || auth.user?.username }}</span>
@@ -113,7 +121,7 @@ watch(
           <span class="pc-brand-mark">星</span>
           <span class="pc-brand-text">
             <strong>星选商城</strong>
-            <small>STARX · 品质生活一站购</small>
+            <small>STARX · 商品选购与订单跟踪</small>
           </span>
         </RouterLink>
 
@@ -130,7 +138,6 @@ watch(
 
         <div class="pc-header-actions">
           <RouterLink class="pc-action-btn" to="/pc/cart">
-            <span aria-hidden="true">🛒</span>
             <span class="label">购物车</span>
             <i v-if="cartBadge" class="pc-cart-badge">{{ cartBadge }}</i>
           </RouterLink>
@@ -139,7 +146,6 @@ watch(
             class="pc-action-btn"
             to="/pc/profile"
           >
-            <span aria-hidden="true">👤</span>
             <span class="label">我的</span>
           </RouterLink>
           <button
@@ -192,8 +198,7 @@ watch(
               星选商城
             </div>
             <p>
-              面向品质生活的新一代购物平台。支持商品浏览、多规格选购、购物车下单、
-              模拟支付与订单全链路追踪。
+              提供商品浏览、SKU 选择、购物车下单、模拟支付与订单进度查看。
             </p>
           </div>
           <div>
@@ -209,16 +214,16 @@ watch(
             <p><RouterLink to="/pc/addresses">地址管理</RouterLink></p>
           </div>
           <div>
-            <h4>服务承诺</h4>
-            <p>正品保障 · 极速发货</p>
-            <p>七天无忧 · 售后可追溯</p>
-            <p>库存实时 · 安全支付</p>
+            <h4>功能一览</h4>
+            <p>SKU 规格 · 库存状态</p>
+            <p>购物车下单 · 模拟支付</p>
+            <p>订单进度 · 商品评价</p>
           </div>
         </div>
         <div class="pc-footer-bottom">
           <span>© {{ new Date().getFullYear() }} 星选商城 STARX. All rights reserved.</span>
           <div class="ops-links">
-            <RouterLink to="/seller/login">商家入驻</RouterLink>
+            <RouterLink to="/seller/login">商家工作台</RouterLink>
             <RouterLink to="/admin/login">平台管理</RouterLink>
           </div>
         </div>

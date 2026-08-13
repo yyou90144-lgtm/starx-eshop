@@ -160,4 +160,75 @@ watch(() => route.params.id, loadOrder, { immediate: true })
   .payment-card { padding: 34px 20px; }
   .payment-actions { align-items: stretch; flex-direction: column; }
 }
+.payment-page {
+  padding-top: 22px;
+}
+
+.payment-card {
+  padding: 40px 46px;
+  border-color: var(--eshop-border) !important;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow) !important;
+}
+
+.payment-card.success {
+  background: var(--eshop-surface) !important;
+  border-color: var(--eshop-border) !important;
+  box-shadow: var(--eshop-shadow) !important;
+}
+
+.payment-icon,
+.payment-card > p {
+  display: none;
+}
+
+.payment-card h1 {
+  color: var(--eshop-text);
+  font-size: 28px;
+  line-height: 1.3;
+}
+
+.order-number {
+  margin-top: 10px;
+  margin-bottom: 22px;
+}
+
+.payment-amount {
+  padding: 20px;
+  background: var(--eshop-surface-soft);
+  border-radius: 10px;
+}
+
+.payment-amount strong {
+  color: var(--eshop-primary);
+  font-size: 34px;
+}
+
+.payment-meta {
+  max-width: 380px;
+  margin: 0 auto 22px;
+}
+
+.payment-actions {
+  margin-top: 22px;
+}
+
+.payment-actions .el-button {
+  min-width: 164px;
+}
+
+.payment-receipt {
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+@media (max-width: 640px) {
+  .payment-page {
+    padding: 16px 12px 52px;
+  }
+
+  .payment-card {
+    padding: 30px 18px;
+  }
+}
 </style>

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
 import { notifyCartUpdated } from '../../utils/cartBadge'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const items = ref([])
@@ -13,7 +14,6 @@ const refreshing = ref(false)
 const bulkUpdating = ref(false)
 const errorMessage = ref('')
 const updatingIds = ref(new Set())
-const failedImages = ref(new Set())
 
 const availableItems = computed(() => items.value.filter((item) => item.available))
 const selectedItems = computed(() => (
@@ -46,17 +46,12 @@ const setItemUpdating = (itemId, updating) => {
 
 const isItemUpdating = (itemId) => updatingIds.value.has(itemId)
 
-const markImageFailed = (itemId) => {
-  failedImages.value = new Set([...failedImages.value, itemId])
-}
-
 const loadCart = async () => {
   if (loading.value) return false
   loading.value = true
   errorMessage.value = ''
   try {
     items.value = await getCart()
-    failedImages.value = new Set()
     return true
   } catch (error) {
     errorMessage.value = error.message || '购物车加载失败'
@@ -218,13 +213,7 @@ onMounted(loadCart)
             <div class="item-content">
               <div class="item-top">
                 <div class="item-img">
-                  <img
-                    v-if="item.productImage && !failedImages.has(item.id)"
-                    :src="item.productImage"
-                    :alt="item.productName"
-                    @error="markImageFailed(item.id)"
-                  />
-                  <span v-else>暂无图片</span>
+                  <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
                 </div>
                 <div class="item-info">
                   <div class="item-name">{{ item.productName }}</div>
@@ -432,5 +421,36 @@ onMounted(loadCart)
 
 :deep(.van-submit-bar__checkbox) {
   flex: 1;
+}
+.mobile-cart {
+  background: var(--eshop-bg);
+}
+
+.cart-item {
+  border: 1px solid var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.cart-item.invalid {
+  background: #fff8f7;
+}
+
+.item-img,
+.cart-addr-bar {
+  background: var(--eshop-surface-soft);
+}
+
+.cart-addr-bar {
+  border: 1px solid var(--eshop-border);
+  border-radius: 10px;
+}
+
+.item-bottom {
+  border-top-color: var(--eshop-border);
+}
+
+.notice-action {
+  color: var(--eshop-primary);
 }
 </style>

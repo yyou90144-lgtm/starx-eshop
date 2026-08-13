@@ -1,4 +1,4 @@
-:root { color: #1f2937; background: #f8fafc; font-family: Inter, "Microsoft YaHei", system-ui, sans-serif; }
+:root { color: #1f2937; background: #f8fafc; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 a { color: inherit; text-decoration: none; }
@@ -25,6 +25,26 @@ a { color: inherit; text-decoration: none; }
 .el-message--error .el-message__icon { color: #ef4444; }
 .el-message--info { background: linear-gradient(110deg, rgba(239, 246, 255, .98), rgba(255, 255, 255, .98)); border-color: #bfdbfe; }
 .el-message--info .el-message__icon { color: #3b82f6; }
+
+/* Shared feedback follows the same quiet, non-glass material language as the app. */
+.el-message {
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(37, 36, 34, .14);
+  backdrop-filter: none;
+}
+.el-message--success { background: #f3fbf5; }
+.el-message--warning { background: #fff9ed; }
+.el-message--error { background: #fff4f3; }
+.el-message--info { background: #f6f6f3; }
+.el-overlay-message-box,
+.van-overlay.eshop-mobile-dialog-overlay { backdrop-filter: none; }
+.el-message-box,
+.van-dialog.eshop-delete-dialog { border-radius: 12px; }
+.el-message-box__btns .el-button--primary {
+  border-color: #e5484d;
+  background: #e5484d;
+  box-shadow: none;
+}
 
 .el-overlay-message-box {
   background: rgba(15, 23, 42, .48);
@@ -171,22 +191,140 @@ a { color: inherit; text-decoration: none; }
 .mobile-nav-actions .workspace-switch-link { font-size: 13px; }
 .mobile-tabbar { --van-tabbar-item-active-color: #2563eb; }
 
-.admin-shell { min-height: 100vh; }
-.admin-aside { min-height: 100vh; background: #071426; box-shadow: 8px 0 30px rgba(15, 23, 42, .08); }
-.admin-aside h1 { margin: 0; padding: 24px 20px; color: #fff; font-size: 19px; }
-.admin-aside h1 span { color: #60a5fa; }
-.admin-aside .el-menu { border: 0; background: transparent; }
-.admin-aside .el-menu-item { color: #cbd5e1; }
-.admin-aside .el-menu-item.is-active { color: #fff; background: #1d4ed8; }
-.admin-aside .el-menu-item:hover { color: #fff; background: rgba(37, 99, 235, .35); }
-.admin-header { display: flex; align-items: center; justify-content: space-between; height: 68px; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.admin-header > div { display: grid; gap: 3px; }
-.admin-header > div b { color: #0f172a; }
-.admin-header > div span { color: #64748b; font-size: 12px; }
-.admin-header .admin-header-actions { display: flex; align-items: center; gap: 8px; }
-.admin-main { padding: 24px; background: #f5f7fb; }
+.admin-shell {
+  --admin-ink: #0c1a2e;
+  --admin-text: #16243a;
+  --admin-muted: #68788e;
+  --admin-page: #f1f4f8;
+  --admin-surface: #ffffff;
+  --admin-surface-soft: #f8fafc;
+  --admin-line: #dce5ef;
+  --admin-primary: #ff4d4f;
+  --admin-primary-strong: #e03638;
+  --el-color-primary: var(--admin-primary);
+  --el-color-primary-light-3: #ff8585;
+  --el-color-primary-light-5: #ffaaa9;
+  --el-color-primary-light-7: #ffd0ce;
+  --el-color-primary-light-8: #ffe1df;
+  --el-color-primary-light-9: #fff1f0;
+  min-height: 100vh;
+  color: var(--admin-text);
+  background: var(--admin-page);
+  font-variant-numeric: tabular-nums;
+}
 
-.terminal-welcome { max-width: 860px; margin: 24px auto; padding: 36px; background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(15, 23, 42, .06); }
+.admin-aside {
+  min-height: 100vh;
+  background: var(--admin-ink);
+  box-shadow: 8px 0 28px rgba(12, 26, 46, .08);
+}
+
+.admin-aside h1 {
+  margin: 0;
+  padding: 24px 22px 14px;
+  color: #fff;
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.admin-aside h1 span { color: var(--admin-primary); }
+.admin-aside .el-menu { padding: 8px 0; border: 0; background: transparent; }
+.admin-aside .el-menu-item {
+  width: auto;
+  height: 42px;
+  margin: 3px 12px;
+  padding: 0 13px !important;
+  color: #b8c4d4;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 42px;
+  transition: color .18s ease, background-color .18s ease;
+}
+.admin-aside .el-menu-item.is-active { color: #fff; background: rgba(255, 255, 255, .14); }
+.admin-aside .el-menu-item:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 28px;
+  background: rgba(255, 255, 255, .96);
+  border-bottom: 1px solid var(--admin-line);
+}
+.admin-header > div { display: grid; gap: 3px; }
+.admin-header > div b { color: var(--admin-text); font-size: 15px; }
+.admin-header > div span { color: var(--admin-muted); font-size: 12px; }
+.admin-header .admin-header-actions { display: flex; align-items: center; gap: 8px; }
+.admin-header .el-button { min-height: 34px; border-radius: 7px; font-weight: 700; }
+.admin-main { padding: 26px 30px 40px; background: var(--admin-page); }
+
+.admin-shell .el-button { border-radius: 7px; font-weight: 700; transition: transform .16s ease, border-color .16s ease, background-color .16s ease; }
+.admin-shell .el-button:active { transform: translateY(1px); }
+.admin-shell .el-button:focus-visible,
+.admin-shell .el-input__wrapper:focus-within,
+.admin-shell .el-select__wrapper.is-focused { outline: 2px solid rgba(255, 77, 79, .36); outline-offset: 2px; }
+.admin-shell .el-input__wrapper,
+.admin-shell .el-select__wrapper { min-height: 38px; background: #fff; box-shadow: 0 0 0 1px var(--admin-line) inset; }
+.admin-shell .el-table { --el-table-border-color: var(--admin-line); --el-table-header-bg-color: #f7f9fc; --el-table-row-hover-bg-color: #fff5f4; --el-table-text-color: var(--admin-text); --el-table-header-text-color: #5d6d82; }
+.admin-shell .el-table th.el-table__cell { height: 44px; font-size: 12px; font-weight: 800; }
+.admin-shell .el-table td.el-table__cell { padding: 11px 0; }
+
+.admin-shell .admin-page,
+.admin-shell .inventory-page,
+.admin-shell .admin-reviews,
+.admin-shell .admin-dashboard { max-width: 1380px; }
+
+.admin-shell .admin-page-heading,
+.admin-shell .page-heading {
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.admin-shell .admin-page-heading p,
+.admin-shell .page-heading p,
+.admin-shell .drawer-heading p { display: none; }
+.admin-shell .admin-page-heading h1,
+.admin-shell .page-heading h1 { color: var(--admin-text); font-size: 26px; line-height: 1.25; }
+.admin-shell .admin-page-heading span,
+.admin-shell .page-heading > div:first-child > span,
+.admin-shell .page-heading span { color: var(--admin-muted); font-size: 13px; line-height: 1.6; }
+.admin-shell .heading-summary { padding: 3px 0; background: transparent; border: 0; border-radius: 0; }
+.admin-shell .heading-summary strong { color: var(--admin-primary); font-size: 26px; }
+
+.admin-shell .filter-card,
+.admin-shell .summary-row,
+.admin-shell .table-card,
+.admin-shell .el-card { border-color: var(--admin-line); border-radius: 10px; box-shadow: none; }
+.admin-shell .filter-card { padding: 13px 14px; background: var(--admin-surface); }
+.admin-shell .table-card,
+.admin-shell .el-card { background: var(--admin-surface); }
+.admin-shell .el-card__body { padding: 16px; }
+.admin-shell .table-toolbar { padding: 2px 2px 16px; }
+.admin-shell .table-toolbar h2 { color: var(--admin-text); }
+.admin-shell .table-toolbar span { color: var(--admin-muted); }
+.admin-shell .pagination,
+.admin-shell .pagination-wrap { margin-top: 0; padding: 16px 20px; }
+
+/* Raise shared workspace rules above individual page scope without changing behavior. */
+.admin-shell .admin-main .admin-page,
+.admin-shell .admin-main .inventory-page,
+.admin-shell .admin-main .admin-reviews,
+.admin-shell .admin-main .admin-dashboard { max-width: 1380px; }
+.admin-shell .admin-main .admin-page-heading,
+.admin-shell .admin-main .page-heading { align-items: flex-start; margin-bottom: 18px; }
+.admin-shell .admin-main .admin-page-heading p,
+.admin-shell .admin-main .page-heading p { display: none; }
+.admin-shell .admin-main .admin-page-heading h1,
+.admin-shell .admin-main .page-heading h1 { color: var(--admin-text); font-size: 26px; line-height: 1.25; }
+.admin-shell .admin-main .admin-page-heading span,
+.admin-shell .admin-main .page-heading > div:first-child > span,
+.admin-shell .admin-main .page-heading span { color: var(--admin-muted); font-size: 13px; line-height: 1.6; }
+.admin-shell .admin-main .heading-summary { padding: 3px 0; background: transparent; border: 0; border-radius: 0; }
+.admin-shell .admin-main .heading-summary strong { color: var(--admin-primary); font-size: 26px; }
+.admin-shell .admin-main .filter-card { padding: 13px 14px; background: var(--admin-surface); border-color: var(--admin-line); border-radius: 10px; box-shadow: none; }
+.admin-shell .admin-main .table-card { background: var(--admin-surface); border-color: var(--admin-line); border-radius: 10px; box-shadow: none; }
+
+.terminal-welcome { max-width: 860px; margin: 24px auto; padding: 36px; background: #fff; border-radius: 12px; box-shadow: 0 12px 28px rgba(12, 26, 46, .06); }
 .terminal-welcome h1 { margin: 0 0 12px; font-size: 30px; }
 .terminal-welcome p:not(.eyebrow) { color: #64748b; line-height: 1.8; }
 .mobile-welcome { margin: 0; padding: 20px; border-radius: 12px; }
@@ -201,4 +339,67 @@ a { color: inherit; text-decoration: none; }
   .pc-header nav { display: none; }
   .pc-user-actions { font-size: 13px; }
   .terminal-welcome { padding: 22px; }
+}
+
+@media (max-width: 760px) {
+  .admin-shell .admin-aside {
+    flex: 0 0 88px;
+    width: 88px !important;
+  }
+
+  .admin-shell .admin-aside h1 {
+    padding: 18px 6px 12px;
+    font-size: 13px;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .admin-shell .admin-aside .el-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: 42px;
+    margin: 3px 6px;
+    padding: 8px 4px !important;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .admin-shell .admin-header {
+    min-width: 0;
+    height: auto;
+    min-height: 58px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .admin-shell .admin-header > div:first-child {
+    min-width: 0;
+  }
+
+  .admin-shell .admin-header > div b,
+  .admin-shell .admin-header > div span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-shell .admin-header .admin-header-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .admin-shell .admin-header .admin-header-actions .el-button {
+    min-height: 32px;
+    padding: 0 7px;
+    font-size: 12px;
+  }
+
+  .admin-shell .admin-main {
+    min-width: 0;
+    padding: 18px 12px 28px;
+  }
 }

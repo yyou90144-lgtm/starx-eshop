@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRoute } from 'vue-router'
 import {
   cancelAdminOrder,
   getAdminOrder,
@@ -15,6 +16,7 @@ import {
   orderStatusInfo,
   specsText,
 } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const orders = ref([])
 const current = ref(1)
@@ -30,6 +32,13 @@ const detailVisible = ref(false)
 const detailLoading = ref(false)
 const detailOrder = ref(null)
 const detailLogs = ref([])
+const route = useRoute()
+
+const validStatuses = new Set(Object.keys(ORDER_STATUS))
+const routeStatus = () => {
+  const value = String(route.query.status || '')
+  return validStatuses.has(value) ? value : ''
+}
 
 const statusOptions = computed(() => (
   Object.entries(ORDER_STATUS).map(([value, info]) => ({ value, label: info.label }))
@@ -254,7 +263,16 @@ const exportOrders = async () => {
   }
 }
 
-onMounted(loadOrders)
+onMounted(() => {
+  statusFilter.value = routeStatus()
+  loadOrders()
+})
+watch(() => route.query.status, (value, previous) => {
+  if (value === previous) return
+  statusFilter.value = routeStatus()
+  current.value = 1
+  loadOrders()
+})
 </script>
 
 <template>
@@ -432,8 +450,7 @@ onMounted(loadOrders)
               class="order-item"
             >
               <div class="product-image">
-                <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-                <span v-else>E-Shop</span>
+                <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
               </div>
               <div class="product-info">
                 <b>{{ item.productName }}</b>

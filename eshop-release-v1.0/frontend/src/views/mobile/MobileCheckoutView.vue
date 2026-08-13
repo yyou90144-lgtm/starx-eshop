@@ -6,6 +6,7 @@ import { getAddresses } from '../../api/address'
 import { getCart } from '../../api/cart'
 import { createOrder } from '../../api/order'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const addresses = ref([])
@@ -15,7 +16,6 @@ const remark = ref('')
 const loading = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
-const failedImages = ref(new Set())
 
 const selectedItems = computed(() => cartItems.value.filter((item) => item.selected))
 const validSelectedItems = computed(() => selectedItems.value.filter((item) => item.available))
@@ -63,7 +63,6 @@ const loadCheckout = async () => {
     const [addressData, cartData] = await Promise.all([getAddresses(), getCart()])
     addresses.value = addressData || []
     cartItems.value = cartData || []
-    failedImages.value = new Set()
 
     const selectionStillExists = selectedAddressId.value
       && addresses.value.some((address) => address.id === selectedAddressId.value)
@@ -91,10 +90,6 @@ const goAddresses = () => {
 
 const goCart = () => {
   router.push({ name: 'mobile-cart' })
-}
-
-const markImageFailed = (itemId) => {
-  failedImages.value = new Set([...failedImages.value, itemId])
 }
 
 const onSubmit = async () => {
@@ -171,7 +166,7 @@ onMounted(loadCheckout)
             <template #right-icon>
               <van-icon
                 :name="selectedAddressId === address.id ? 'checked' : 'circle'"
-                :color="selectedAddressId === address.id ? '#1d4ed8' : '#c8c9cc'"
+                :color="selectedAddressId === address.id ? '#ff4d4f' : '#c8c9cc'"
                 size="20"
               />
             </template>
@@ -202,13 +197,7 @@ onMounted(loadCheckout)
         >
           <template #thumb>
             <div class="thumb">
-              <img
-                v-if="item.productImage && !failedImages.has(item.id)"
-                :src="item.productImage"
-                :alt="item.productName"
-                @error="markImageFailed(item.id)"
-              />
-              <span v-else>E-Shop</span>
+              <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
             </div>
           </template>
           <template #footer>
@@ -240,13 +229,7 @@ onMounted(loadCheckout)
         >
           <template #thumb>
             <div class="thumb invalid">
-              <img
-                v-if="item.productImage && !failedImages.has(item.id)"
-                :src="item.productImage"
-                :alt="item.productName"
-                @error="markImageFailed(item.id)"
-              />
-              <span v-else>E-Shop</span>
+              <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
             </div>
           </template>
         </van-card>
@@ -283,7 +266,7 @@ onMounted(loadCheckout)
         :button-text="submitButtonText"
         :disabled="!canSubmit"
         :loading="submitting"
-        button-color="#1d4ed8"
+        button-color="#ff4d4f"
         @submit="onSubmit"
       />
     </template>
@@ -429,5 +412,31 @@ onMounted(loadCheckout)
 
 .bottom-placeholder {
   height: 12px;
+}
+.mobile-checkout {
+  background: var(--eshop-bg);
+}
+
+.block :deep(.van-cell-group__title) {
+  color: var(--eshop-text);
+}
+
+.address-active {
+  background: var(--eshop-primary-soft);
+}
+
+.thumb {
+  color: var(--eshop-muted);
+  background: var(--eshop-surface-soft);
+}
+
+.invalid-block {
+  border-color: #ffccc7;
+}
+
+.amount-row :deep(.van-cell__value),
+.checkout-card .subtotal,
+.checkout-card :deep(.van-card__price) {
+  color: var(--eshop-primary);
 }
 </style>

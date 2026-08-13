@@ -224,7 +224,6 @@ onMounted(refreshAll)
   <div class="admin-users">
     <header class="account-hero">
       <div>
-        <p>PLATFORM ACCOUNT CENTER</p>
         <h1>买家与卖家管理</h1>
         <span>统一创建和管理商城消费者与商家运营账号，角色和启停状态修改后立即生效。</span>
       </div>
@@ -452,37 +451,6 @@ onMounted(refreshAll)
   margin: 0 auto;
 }
 
-.account-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 28px 32px;
-  color: #fff;
-  background:
-    radial-gradient(circle at 85% 15%, rgba(45, 212, 191, 0.32), transparent 26%),
-    linear-gradient(125deg, #0f172a, #164e63 62%, #0f766e);
-  border-radius: 20px;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
-}
-
-.account-hero p {
-  margin: 0 0 8px;
-  color: #99f6e4;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-}
-
-.account-hero h1 {
-  margin: 0 0 9px;
-  font-size: 30px;
-}
-
-.account-hero span {
-  color: #cbd5e1;
-}
-
 .hero-actions {
   display: flex;
   flex: 0 0 auto;
@@ -501,7 +469,6 @@ onMounted(refreshAll)
   color: #2563eb;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-top: 4px solid currentColor;
   border-radius: 14px;
 }
 
@@ -557,6 +524,89 @@ onMounted(refreshAll)
 
 .create-form {
   margin-top: 20px;
+}
+
+.account-hero {
+  align-items: center;
+  padding: 0 0 18px;
+  color: #16243a;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.account-hero p {
+  display: none;
+}
+
+.account-hero h1 {
+  margin: 0 0 6px;
+  color: #16243a;
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.account-hero span {
+  color: #68788e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  gap: 8px;
+}
+
+.summary-grid {
+  gap: 0;
+  margin: 0 0 18px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+}
+
+.summary-grid article {
+  min-height: 118px;
+  padding: 19px 20px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid #e9eef4;
+  border-top: 0;
+  border-radius: 0;
+}
+
+.summary-grid article:last-child {
+  border-right: 0;
+}
+
+.summary-grid span,
+.summary-grid small {
+  color: #68788e;
+  font-size: 12px;
+}
+
+.summary-grid strong {
+  margin: 10px 0 7px;
+  color: #16243a;
+  font-size: 27px;
+}
+
+.summary-grid .buyer-card,
+.summary-grid .seller-card,
+.summary-grid .enabled-card,
+.summary-grid .disabled-card {
+  color: inherit;
+}
+
+.search-card {
+  overflow: hidden;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+}
+
+.search-card :deep(.el-card__body) {
+  padding: 13px 14px;
 }
 
 @media (max-width: 1000px) {

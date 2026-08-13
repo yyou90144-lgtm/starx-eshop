@@ -16,6 +16,7 @@ import {
   orderStatusInfo,
   specsText,
 } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const route = useRoute()
 const router = useRouter()
@@ -286,8 +287,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
             />
             <article v-for="item in order.items" :key="item.id" class="order-item">
               <div class="product-image">
-                <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-                <span v-else>E-Shop</span>
+                <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
               </div>
               <div class="product-info">
                 <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
@@ -464,5 +464,72 @@ watch(() => route.params.id, loadDetail, { immediate: true })
   .order-item { grid-template-columns: 60px 1fr; }
   .order-item > span, .order-item > strong, .review-action { grid-column: 2; text-align: left; }
   .status-actions { align-items: stretch; flex-direction: column; width: 100%; }
+}
+.detail-page {
+  padding-top: 8px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.status-card {
+  margin-bottom: 16px;
+  padding: 28px 30px;
+  background: var(--eshop-ink);
+  border: 1px solid var(--eshop-ink);
+  border-radius: var(--eshop-radius);
+  box-shadow: 0 16px 34px rgba(12, 26, 46, .16);
+}
+
+.status-card p {
+  display: none;
+}
+
+.status-card h1 {
+  margin-bottom: 8px;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.detail-card {
+  padding: 24px;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.detail-card h2 {
+  margin-bottom: 18px;
+  color: var(--eshop-text);
+  font-size: 19px;
+}
+
+.product-image {
+  background: var(--eshop-surface-soft);
+}
+
+.order-item {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: transparent !important;
+}
+
+.amount-row {
+  padding-top: 18px;
+}
+
+.amount-row strong {
+  color: var(--eshop-primary);
+}
+
+.timeline-card :deep(.el-timeline-item__node--primary) {
+  background-color: var(--eshop-primary);
+}
+
+@media (max-width: 900px) {
+  .detail-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
 }
 </style>

@@ -4,6 +4,7 @@ import { showConfirmDialog, showToast } from 'vant'
 import { useRouter } from 'vue-router'
 import { cancelOrder, confirmOrder, getOrders } from '../../api/order'
 import { formatDateTime, formatMoney, orderStatusInfo } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const orders = ref([])
@@ -156,7 +157,7 @@ onActivated(() => {
       @click-tab="(tab) => changeStatus(tab.name)"
       sticky
       offset-top="46px"
-      color="#1d4ed8"
+      color="#ff4d4f"
     >
       <van-tab
         v-for="option in statusOptions"
@@ -204,7 +205,7 @@ onActivated(() => {
           </template>
           <template #thumb>
             <div class="thumb">
-              <img v-if="order.items?.[0]?.productImage" :src="order.items[0].productImage" :alt="order.items[0].productName" />
+              <img v-if="order.items?.[0]" :src="productImageSrc(order.items[0])" :alt="order.items[0].productName" @error="restoreProductImage($event, order.items[0])" />
               <span v-else>E-Shop</span>
             </div>
           </template>
@@ -289,4 +290,27 @@ onActivated(() => {
 .more-items { margin: 4px 0 0; color: #969799; font-size: 12px; }
 .order-card :deep(.van-card__footer) { padding-top: 10px; }
 .order-card :deep(.van-button) { height: 30px; }
+.mobile-orders {
+  background: var(--eshop-bg);
+}
+
+.orders-summary {
+  color: var(--eshop-muted);
+}
+
+.order-card {
+  border: 1px solid var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.thumb {
+  color: var(--eshop-muted);
+  background: var(--eshop-surface-soft);
+}
+
+.order-amount,
+.order-card :deep(.van-card__price) {
+  color: var(--eshop-primary);
+}
 </style>

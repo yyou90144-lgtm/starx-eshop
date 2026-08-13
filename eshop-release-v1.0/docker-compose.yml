@@ -18,6 +18,9 @@ services:
   backend:
     build:
       context: ./backend
+    ports:
+      # PC Vite and USB-connected Android both use this single backend.
+      - "127.0.0.1:8080:8080"
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306

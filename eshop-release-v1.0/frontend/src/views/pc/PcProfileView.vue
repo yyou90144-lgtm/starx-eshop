@@ -548,4 +548,125 @@ onMounted(loadProfile)
     width: 100%;
   }
 }
+.pc-profile {
+  padding-top: 16px;
+}
+
+.profile-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  display: none;
+}
+
+.profile-heading h1 {
+  margin-bottom: 6px;
+  color: var(--eshop-text);
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.heading-desc {
+  color: var(--eshop-muted);
+}
+
+.reload-btn {
+  border-color: var(--eshop-border) !important;
+  border-radius: 8px !important;
+  color: var(--eshop-text-soft) !important;
+  background: var(--eshop-surface) !important;
+}
+
+.identity-card,
+.quick-links,
+.profile-card {
+  background: var(--eshop-surface) !important;
+  border-color: var(--eshop-border) !important;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.identity-card {
+  background: var(--eshop-surface) !important;
+}
+
+.avatar-mark {
+  border-radius: 10px;
+  background: var(--eshop-primary);
+  box-shadow: none;
+  letter-spacing: 0;
+}
+
+.identity-meta h2,
+.ql-label,
+.card-head h3 {
+  color: var(--eshop-text);
+  letter-spacing: 0;
+}
+
+.username,
+.ql-hint,
+.card-head p,
+.form-tip,
+.text-reset {
+  color: var(--eshop-muted);
+}
+
+.quick-link:hover {
+  background: var(--eshop-surface-soft);
+  transform: none;
+}
+
+.quick-link:focus-visible,
+.text-reset:focus-visible {
+  outline-color: var(--eshop-primary);
+}
+
+.role-chip {
+  letter-spacing: 0;
+}
+
+.role-chip.seller {
+  color: #a15c00;
+  background: #fff7e8;
+}
+
+.role-chip.admin {
+  color: var(--eshop-text-soft);
+  background: var(--eshop-surface-soft);
+}
+
+.card-head {
+  border-bottom-color: var(--eshop-border);
+}
+
+.profile-form :deep(.el-form-item__label) {
+  color: var(--eshop-text-soft);
+}
+
+.profile-form :deep(.el-input__wrapper) {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--eshop-border) inset;
+}
+
+.profile-form :deep(.el-input__wrapper:hover),
+.profile-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #ffaaa8 inset !important;
+}
+
+.profile-form :deep(.el-input.is-disabled .el-input__wrapper) {
+  background: var(--eshop-surface-soft);
+}
+
+.save-btn {
+  border-radius: 8px !important;
+}
+
+@media (max-width: 640px) {
+  .pc-profile {
+    width: min(100% - 24px, var(--eshop-container, 1280px));
+  }
+}
 </style>

@@ -88,6 +88,16 @@
 
 ## 八、本地运行与验证
 
+### 0. 电脑与 Android 共用同一后端（推荐开发方式）
+
+在项目根目录执行：
+
+```powershell
+.\scripts\start-shared-backend.ps1
+```
+
+该命令启动唯一的 `http://127.0.0.1:8080/api/` 后端，并将开发数据持久化到 `data/shared-backend/eshop.mv.db`。PC Vite 的 `/api` 代理、Android 模拟器的 `10.0.2.2:8080` 与 USB 真机的 `adb reverse` 都连接此服务，因此任一端保存的商品、库存、用户、购物车和订单都会出现在另一端。停止服务使用 `.\scripts\stop-shared-backend.ps1`，不会删除数据。
+
 ### 1. 准备环境变量
 
 在 PowerShell 中进入项目根目录并执行：

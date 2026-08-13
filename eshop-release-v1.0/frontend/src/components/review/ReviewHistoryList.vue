@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { getMyReviews } from '../../api/review'
 import { formatDateTime, specsText } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const props = defineProps({
   platform: {
@@ -20,7 +21,6 @@ const current = ref(1)
 const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
-const failedImages = ref(new Set())
 let requestSequence = 0
 
 const stars = (rating) => {
@@ -34,10 +34,6 @@ const productTarget = (review) => (
     : { name: 'pc-product-detail', params: { id: review.productId } }
 )
 
-const markImageFailed = (id) => {
-  failedImages.value = new Set([...failedImages.value, id])
-}
-
 const loadReviews = async (page = 1) => {
   const requestId = ++requestSequence
   loading.value = true
@@ -48,7 +44,6 @@ const loadReviews = async (page = 1) => {
     reviews.value = Array.isArray(data?.records) ? data.records : []
     current.value = Number(data?.current) || page
     total.value = Number(data?.total) || 0
-    failedImages.value = new Set()
   } catch (error) {
     if (requestId !== requestSequence) return
     reviews.value = []
@@ -84,13 +79,7 @@ void loadReviews(1)
     <div v-else class="history-list">
       <article v-for="review in reviews" :key="review.id" class="history-item">
         <RouterLink :to="productTarget(review)" class="product-image">
-          <img
-            v-if="review.productImage && !failedImages.has(review.id)"
-            :src="review.productImage"
-            :alt="review.productName"
-            @error="markImageFailed(review.id)"
-          />
-          <span v-else>E-Shop</span>
+          <img :src="productImageSrc(review)" :alt="review.productName" @error="restoreProductImage($event, review)" />
         </RouterLink>
         <div class="review-content">
           <div class="review-heading">
@@ -347,5 +336,59 @@ void loadReviews(1)
     flex-direction: column;
     gap: 4px;
   }
+}
+.history-item {
+  padding: 18px;
+  border-color: var(--eshop-border);
+  border-radius: 12px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.product-image {
+  color: var(--eshop-muted);
+  background: var(--eshop-surface-soft);
+  border-radius: 10px;
+}
+
+.review-photos a {
+  background: var(--eshop-surface-soft);
+}
+
+.review-heading a {
+  color: var(--eshop-text);
+}
+
+.review-heading a:hover {
+  color: var(--eshop-primary);
+}
+
+.review-heading time,
+.review-content > small,
+.review-content footer {
+  color: var(--eshop-muted);
+}
+
+.review-content > p {
+  color: var(--eshop-text-soft);
+}
+
+.history-state {
+  color: var(--eshop-muted);
+  background: var(--eshop-surface);
+  border-color: var(--eshop-border);
+  border-radius: 12px;
+}
+
+.history-state a,
+.history-state button,
+.history-pagination button {
+  color: var(--eshop-primary);
+  border-color: #ffccc7;
+}
+
+.history-panel.mobile .history-item {
+  border: 1px solid var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
 }
 </style>

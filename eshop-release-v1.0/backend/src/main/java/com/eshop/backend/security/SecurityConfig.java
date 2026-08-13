@@ -65,7 +65,7 @@ public class SecurityConfig {
                         // Static product images
                         .requestMatchers("/uploads/**").permitAll()
                         // Demo assets (disable in production if unused)
-                        .requestMatchers(HttpMethod.GET, "/demo/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/demo/**", "/api/demo/**").permitAll()
                         // Public catalog browse
                         .requestMatchers(HttpMethod.GET, "/categories", "/categories/**", "/products", "/products/**")
                         .permitAll()

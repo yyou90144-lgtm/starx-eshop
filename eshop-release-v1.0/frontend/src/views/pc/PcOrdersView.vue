@@ -10,6 +10,7 @@ import {
   orderStatusInfo,
   specsText,
 } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const orders = ref([])
@@ -145,8 +146,7 @@ onMounted(loadOrders)
           <div class="order-products">
             <div v-for="item in order.items.slice(0, 3)" :key="item.id" class="order-product">
               <div class="product-image">
-                <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-                <span v-else>E-Shop</span>
+                <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
               </div>
               <div>
                 <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
@@ -268,5 +268,84 @@ onMounted(loadOrders)
   .order-body { grid-template-columns: 1fr; }
   .order-products, .order-actions { grid-column: auto; }
   .receiver, .order-total { padding: 12px 0 0; border-top: 1px solid #eef2f7; border-left: 0; }
+}
+.page-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-heading p {
+  display: none;
+}
+
+.page-heading h1 {
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.page-heading span {
+  margin-top: 6px;
+  color: var(--eshop-muted);
+  font-size: 14px;
+}
+
+.status-tabs {
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--eshop-border);
+  border-radius: 0;
+}
+
+.status-tabs button {
+  padding: 11px 16px;
+  color: var(--eshop-muted) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 8px 8px 0 0;
+}
+
+.status-tabs button:hover {
+  color: var(--eshop-primary) !important;
+  background: var(--eshop-primary-soft) !important;
+}
+
+.status-tabs button.active {
+  color: var(--eshop-primary) !important;
+  background: var(--eshop-primary-soft) !important;
+  box-shadow: inset 0 -2px 0 var(--eshop-primary);
+}
+
+.order-card {
+  margin-bottom: 14px;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.order-card > header {
+  padding: 14px 20px;
+  background: var(--eshop-surface-soft) !important;
+}
+
+.order-body {
+  padding: 20px;
+}
+
+.product-image {
+  background: var(--eshop-surface-soft);
+}
+
+.order-actions .el-button {
+  min-height: 34px;
+}
+
+@media (max-width: 920px) {
+  .orders-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
 }
 </style>

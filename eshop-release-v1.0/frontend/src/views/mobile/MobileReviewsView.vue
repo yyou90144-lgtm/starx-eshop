@@ -47,4 +47,28 @@ import ReviewHistoryList from '../../components/review/ReviewHistoryList.vue'
   color: #dbeafe;
   font-size: 13px;
 }
+.mobile-reviews {
+  background: var(--eshop-bg);
+}
+
+.review-hero {
+  padding: 20px;
+  background: var(--eshop-ink);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(12, 26, 46, .16);
+}
+
+.review-hero p {
+  display: none;
+}
+
+.review-hero h1 {
+  margin-bottom: 6px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.review-hero span {
+  color: #cbd5e1;
+}
 </style>

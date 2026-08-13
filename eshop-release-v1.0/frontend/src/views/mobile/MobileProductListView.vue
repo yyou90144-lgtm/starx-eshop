@@ -251,7 +251,7 @@ onActivated(() => {
             <span class="product-subtitle">{{ product.subtitle || '品质商品，放心选购' }}</span>
             <span class="product-meta">
               <strong>{{ formatMoney(product.minPrice) }}</strong>
-              <span v-if="product.totalStock > 0">查看详情 →</span>
+              <span v-if="product.totalStock > 0">查看详情</span>
               <span v-else class="sold-out-text">暂时缺货</span>
             </span>
           </span>
@@ -275,7 +275,7 @@ onActivated(() => {
 .mobile-products {
   min-height: 100%;
   padding: 0 0 24px;
-  background: #f7f4f1;
+  background: #f5f5f2;
 }
 
 .search-bar {
@@ -284,7 +284,7 @@ onActivated(() => {
   z-index: 12;
   padding: 10px 12px 8px;
   background: #fff;
-  border-bottom: 1px solid #f0ebe6;
+  border-bottom: 1px solid #e2e1dd;
 }
 
 .m-search {
@@ -292,9 +292,9 @@ onActivated(() => {
   align-items: stretch;
   height: 40px;
   overflow: hidden;
-  background: #faf7f5;
-  border: 1px solid #ebe4de;
-  border-radius: 12px;
+  background: #fafaf8;
+  border: 1px solid #e2e1dd;
+  border-radius: 8px;
   box-sizing: border-box;
 }
 
@@ -324,19 +324,19 @@ onActivated(() => {
 .m-search-field :deep(.van-field__control) {
   height: 100%;
   font-size: 14px;
-  color: #1c1917;
+  color: #252422;
 }
 
 .m-search-field :deep(.van-field__left-icon) {
   display: flex;
   align-items: center;
   margin-right: 4px;
-  color: #8a837c;
+  color: #746f68;
 }
 
 .m-search-field :deep(.van-field__clear) {
   margin-right: 4px;
-  color: #b8b0a8;
+  color: #a9a59e;
 }
 
 .m-search-btn {
@@ -346,16 +346,15 @@ onActivated(() => {
   padding: 0 14px;
   border: 0;
   color: #fff;
-  background: #ff4d4f;
+  background: #e5484d;
   font-size: 14px;
   font-weight: 700;
-  letter-spacing: .04em;
   line-height: 1;
   cursor: pointer;
 }
 
 .m-search-btn:active {
-  background: #e03638;
+  background: #c83b40;
 }
 
 .category-bar {
@@ -374,19 +373,19 @@ onActivated(() => {
 .category-chip {
   flex-shrink: 0;
   padding: 6px 14px;
-  color: #5c564f;
+  color: #45433f;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   background: #fff;
-  border: 1px solid #ebe4de;
+  border: 1px solid #e2e1dd;
   border-radius: 999px;
 }
 
 .category-chip.active {
-  color: #ff4d4f;
+  color: #e5484d;
   background: #fff1f0;
-  border-color: #ffd6d2;
+  border-color: #f2bbb9;
 }
 
 .result-heading {
@@ -394,19 +393,19 @@ onActivated(() => {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px 4px;
-  color: #8a837c;
+  color: #746f68;
   font-size: 13px;
 }
 
 .result-heading strong {
   margin-right: 4px;
-  color: #1c1917;
+  color: #252422;
   font-size: 15px;
 }
 
 .result-heading button {
   padding: 4px;
-  color: #ff4d4f;
+  color: #e5484d;
   font: inherit;
   font-weight: 600;
   background: transparent;
@@ -428,9 +427,16 @@ onActivated(() => {
   font: inherit;
   text-align: left;
   background: #fff;
-  border: 0;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+  border: 1px solid #e2e1dd;
+  border-radius: 10px;
+  box-shadow: none;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease;
+}
+
+.product-card:active {
+  background: #fafaf8;
+  border-color: #b6b3ad;
 }
 
 .product-thumb {
@@ -441,8 +447,8 @@ onActivated(() => {
   height: 100px;
   place-items: center;
   overflow: hidden;
-  background: #f3ece6;
-  border-radius: 10px;
+  background: #efefeb;
+  border-radius: 8px;
 }
 
 .product-thumb img {
@@ -452,7 +458,7 @@ onActivated(() => {
 }
 
 .image-placeholder {
-  color: #ffccc7;
+  color: #d9a7a5;
   font-size: 11px;
   font-weight: 800;
 }
@@ -484,7 +490,7 @@ onActivated(() => {
 .product-name {
   display: -webkit-box;
   overflow: hidden;
-  color: #1c1917;
+  color: #252422;
   font-size: 14px;
   line-height: 1.4;
   -webkit-box-orient: vertical;
@@ -510,12 +516,12 @@ onActivated(() => {
 }
 
 .product-meta strong {
-  color: #dc2626;
+  color: #c83b40;
   font-size: 16px;
 }
 
 .product-meta > span {
-  color: #ff4d4f;
+  color: #e5484d;
   font-size: 12px;
   font-weight: 600;
 }

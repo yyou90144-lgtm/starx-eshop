@@ -6,6 +6,7 @@ import { cancelOrder, confirmOrder, getOrder, getOrderLogs } from '../../api/ord
 import { uploadUserImage } from '../../api/file'
 import { createReview, getReviewedOrderItemIds } from '../../api/review'
 import { formatDateTime, formatMoney, orderStatusInfo, specsText } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const route = useRoute()
 const router = useRouter()
@@ -295,8 +296,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           </template>
           <template #icon>
             <div class="thumb">
-              <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-              <span v-else>E-Shop</span>
+              <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
             </div>
           </template>
         </van-cell>

@@ -280,4 +280,40 @@ onMounted(loadFavorites)
 .favorites-pagination {
   margin-top: 18px;
 }
+.mobile-favorites {
+  background: var(--eshop-bg);
+}
+
+.mobile-favorites :deep(.van-loading) {
+  color: var(--eshop-primary) !important;
+}
+
+.notice-action {
+  color: var(--eshop-primary);
+}
+
+.favorite-card {
+  border: 1px solid var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.product-image {
+  color: var(--eshop-muted);
+  background: var(--eshop-surface-soft);
+}
+
+.product-info h2 {
+  color: var(--eshop-text);
+}
+
+.product-info p,
+.product-meta span,
+.product-info small {
+  color: var(--eshop-muted);
+}
+
+.product-meta strong {
+  color: var(--eshop-primary);
+}
 </style>

@@ -230,4 +230,61 @@ onMounted(loadHistory)
 .price-row span, .product-body small { color: #94a3b8; font-size: 12px; }
 .card-actions { display: flex; gap: 8px; }
 .pagination { display: flex; justify-content: center; margin-top: 24px; }
+.page-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-heading > div > span {
+  display: none;
+}
+
+.page-heading h1 {
+  margin: 0 0 6px;
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.page-heading p {
+  color: var(--eshop-muted);
+}
+
+.product-grid {
+  gap: 16px;
+}
+
+.product-card {
+  border-radius: 12px !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.product-image {
+  background: var(--eshop-surface-soft);
+}
+
+.product-image span {
+  color: var(--eshop-muted);
+}
+
+.product-body h2 {
+  color: var(--eshop-text);
+}
+
+.product-body p,
+.price-row span,
+.product-body small {
+  color: var(--eshop-muted);
+}
+
+.price-row strong {
+  color: var(--eshop-primary);
+}
+
+@media (max-width: 720px) {
+  .history-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
 </style>

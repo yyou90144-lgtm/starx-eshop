@@ -455,4 +455,35 @@ onMounted(loadAddresses)
 .form-default {
   padding: 12px 16px;
 }
+.mobile-addresses {
+  background: var(--eshop-bg);
+}
+
+.notice-action {
+  color: var(--eshop-primary);
+}
+
+.address-card {
+  border-color: var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.address-card.is-default {
+  border-color: #ffaaa8;
+  box-shadow: 0 0 0 1px #ffaaa8, var(--eshop-shadow-sm);
+}
+
+.address-avatar {
+  background: var(--eshop-primary);
+  border-radius: 10px;
+}
+
+.address-detail {
+  color: var(--eshop-text-soft);
+}
+
+.address-actions {
+  border-top-color: var(--eshop-border);
+}
 </style>

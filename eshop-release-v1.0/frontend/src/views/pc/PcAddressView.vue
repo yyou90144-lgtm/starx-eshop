@@ -288,4 +288,75 @@ onMounted(loadAddresses)
   .address-grid, .two-columns, .three-columns { grid-template-columns: 1fr; }
   .page-heading { align-items: stretch; flex-direction: column; gap: 18px; }
 }
+.page-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-heading p {
+  display: none;
+}
+
+.page-heading h1 {
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.page-heading span {
+  margin-top: 6px;
+  color: var(--eshop-muted);
+  font-size: 14px;
+}
+
+.address-grid {
+  gap: 14px;
+}
+
+.address-card,
+.add-card {
+  min-height: 210px;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.address-card.default {
+  border-color: #ffaaa8 !important;
+  box-shadow: 0 0 0 1px #ffaaa8, var(--eshop-shadow-sm) !important;
+}
+
+.address-top .avatar {
+  border-radius: 10px;
+  background: var(--eshop-primary);
+}
+
+.address-top h2 {
+  color: var(--eshop-text);
+}
+
+.full-address {
+  color: var(--eshop-text-soft);
+}
+
+.address-card footer {
+  border-top-color: var(--eshop-border);
+}
+
+.add-card {
+  color: var(--eshop-muted);
+  border-color: var(--eshop-border) !important;
+}
+
+.add-card:hover {
+  color: var(--eshop-primary);
+  background: var(--eshop-primary-soft) !important;
+  border-color: #ffaaa8 !important;
+}
+
+@media (max-width: 760px) {
+  .address-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
 </style>

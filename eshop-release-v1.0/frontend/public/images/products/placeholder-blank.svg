@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#f0efec"/>
+  <rect x="40" y="40" width="720" height="720" rx="16" fill="#fafaf8" stroke="#e2e1dd" stroke-width="2" stroke-dasharray="10 8"/>
+  <text x="400" y="390" text-anchor="middle" fill="#b0aea8" font-family="Microsoft YaHei, sans-serif" font-size="28" font-weight="700">STARX</text>
+  <text x="400" y="430" text-anchor="middle" fill="#c8c6c0" font-family="Microsoft YaHei, sans-serif" font-size="16">图片占位</text>
+</svg>

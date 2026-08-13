@@ -3,13 +3,15 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategories, getHotProducts, getProducts } from '../../api/catalog'
 import HotProductRanking from '../../components/catalog/HotProductRanking.vue'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
-
 const categories = ref([])
 const categoryLoading = ref(false)
 const dealProducts = ref([])
 const hotPreview = ref([])
+const dealProductsError = ref(false)
+const hotPreviewError = ref(false)
 const currentBanner = ref(0)
 let bannerTimer
 
@@ -18,12 +20,10 @@ const displayName = (name = '') => name
   .replace(/^演示\s*/, '')
   .replace(/^演示/, '')
 
-const findCategoryByKeywords = (keywords) => (
-  categories.value.find((item) => {
-    const name = displayName(item.name)
-    return keywords.some((word) => name.includes(word))
-  })
-)
+const findCategoryByKeywords = (keywords) => categories.value.find((item) => {
+  const name = displayName(item.name)
+  return keywords.some((word) => name.includes(word))
+})
 
 const banners = computed(() => {
   const phone = findCategoryByKeywords(['手机', '数码'])
@@ -36,103 +36,65 @@ const banners = computed(() => {
   return [
     {
       key: 'phone',
-      badge: '数码专场',
-      title: '手机数码馆',
-      subtitle: '旗舰影像、轻薄长续航与配件一次挑齐。',
-      cta: '进入手机数码',
-      tone: 'red',
-      visual: 'phone',
-      target: phone || first
-        ? { type: 'category', categoryId: (phone || first).id }
-        : { type: 'catalog' },
+      badge: '手机数码',
+      title: '把日常装进更轻的设备',
+      subtitle: '从通勤到创作，挑一件真正适合你使用方式的设备。',
+      cta: '逛手机数码',
+      image: '/images/catalog/phone-studio.jpg',
+      target: phone || first ? { type: 'category', categoryId: (phone || first).id } : { type: 'catalog' },
     },
     {
       key: 'computer',
-      badge: '办公焕新',
-      title: '电脑办公馆',
-      subtitle: '笔记本、键鼠外设与显示器，高效办公更顺手。',
-      cta: '进入电脑办公',
-      tone: 'ink',
-      visual: 'computer',
-      target: computer || second
-        ? { type: 'category', categoryId: (computer || second).id }
-        : { type: 'catalog' },
+      badge: '电脑办公',
+      title: '让工作区更顺手',
+      subtitle: '笔记本、键鼠和显示器，按你的桌面节奏一次选齐。',
+      cta: '逛电脑办公',
+      image: '/images/catalog/laptop-studio.jpg',
+      target: computer || second ? { type: 'category', categoryId: (computer || second).id } : { type: 'catalog' },
     },
     {
       key: 'home',
-      badge: '居家好物',
-      title: '家居生活馆',
-      subtitle: '清洁、照明与智能小电，把日子过得更舒服。',
-      cta: '进入家居生活',
-      tone: 'cream',
-      visual: 'home',
-      target: home || third
-        ? { type: 'category', categoryId: (home || third).id }
-        : { type: 'catalog' },
+      badge: '家居生活',
+      title: '让家里的每一盏灯都刚刚好',
+      subtitle: '清洁、照明和小家电，买回去就能用得上的生活好物。',
+      cta: '逛家居生活',
+      image: '/images/catalog/lamp-studio.jpg',
+      target: home || third ? { type: 'category', categoryId: (home || third).id } : { type: 'catalog' },
     },
     {
       key: 'hot',
-      badge: '实时热销',
-      title: '近 30 天热销榜',
-      subtitle: '按有效订单销量排序，看看大家都在买什么。',
+      badge: '近 30 天热销',
+      title: '先看看大家正在买什么',
+      subtitle: '按有效订单销量排序，把真实购买行为放在你面前。',
       cta: '查看热销榜',
-      tone: 'dark',
-      visual: 'hot',
+      image: '/images/catalog/headphones-studio.jpg',
       target: { type: 'anchor', id: 'hot-ranking' },
     },
   ]
 })
 
 const activeBanner = computed(() => banners.value[currentBanner.value] || banners.value[0])
+const channelMenus = computed(() => categories.value.map((item, index) => ({
+  id: item.id,
+  name: displayName(item.name),
+  desc: ['高频设备', '效率工具', '居家好物'][index] || '品质日常',
+})))
 
-const channelMenus = computed(() => {
-  const icons = ['📱', '💻', '🏠', '🎁', '⚡', '🎧']
-  return categories.value.map((item, index) => ({
-    id: item.id,
-    name: displayName(item.name),
-    icon: icons[index % icons.length],
-    desc: index === 0 ? '热卖尖货' : index === 1 ? '高效装备' : '品质日常',
-  }))
-})
+const formatMoney = (value) => value === null || value === undefined
+  ? '暂无报价'
+  : `¥${Number(value).toFixed(2)}`
 
-const formatMoney = (value) => {
-  if (value === null || value === undefined) return '暂无报价'
-  return `¥${Number(value).toFixed(2)}`
-}
-
-const goCatalog = (query = {}) => {
-  router.push({ name: 'pc-products', query })
-}
-
-const openCategory = (categoryId) => {
-  goCatalog(categoryId ? { categoryId } : {})
-}
-
-const openProduct = (id) => {
-  router.push({ name: 'pc-product-detail', params: { id } })
-}
-
-const scrollToHot = () => {
-  document.getElementById('hot-ranking')?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  })
-}
+const goCatalog = (query = {}) => router.push({ name: 'pc-products', query })
+const openCategory = (categoryId) => goCatalog(categoryId ? { categoryId } : {})
+const openProduct = (id) => router.push({ name: 'pc-product-detail', params: { id } })
+const scrollToHot = () => document.getElementById('hot-ranking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
 const openCampaign = (banner = activeBanner.value) => {
   const target = banner?.target
   if (!target) return
-  if (target.type === 'category' && target.categoryId) {
-    openCategory(target.categoryId)
-    return
-  }
-  if (target.type === 'catalog') {
-    goCatalog()
-    return
-  }
-  if (target.type === 'anchor' && target.id === 'hot-ranking') {
-    scrollToHot()
-  }
+  if (target.type === 'category') return openCategory(target.categoryId)
+  if (target.type === 'catalog') return goCatalog()
+  return scrollToHot()
 }
 
 const loadCategories = async () => {
@@ -147,12 +109,17 @@ const loadCategories = async () => {
 }
 
 const loadDeals = async () => {
-  try {
-    const [page, hot] = await Promise.all([
-      getProducts({ current: 1, size: 8 }),
-      getHotProducts({ days: 30, limit: 3 }),
-    ])
-    const list = (page.records || []).map((product) => ({
+  const [pageResult, hotResult] = await Promise.allSettled([
+    getProducts({ current: 1, size: 8 }),
+    getHotProducts({ days: 30, limit: 3 }),
+  ])
+
+  let list = []
+  dealProductsError.value = pageResult.status === 'rejected'
+  hotPreviewError.value = hotResult.status === 'rejected'
+
+  if (pageResult.status === 'fulfilled') {
+    list = (pageResult.value.records || []).map((product) => ({
       ...product,
       name: displayName(product.name),
       imageFailed: false,
@@ -161,70 +128,73 @@ const loadDeals = async () => {
       .filter((item) => Number(item.totalStock) > 0)
       .sort((a, b) => Number(a.totalStock) - Number(b.totalStock))
       .slice(0, 3)
-    if (dealProducts.value.length < 3) {
-      dealProducts.value = list.slice(0, 3)
-    }
-    hotPreview.value = (hot || []).map((item) => ({
+    if (dealProducts.value.length < 3) dealProducts.value = list.slice(0, 3)
+  } else {
+    dealProducts.value = []
+  }
+
+  if (hotResult.status === 'fulfilled') {
+    hotPreview.value = (hotResult.value || []).map((item) => ({
       ...item,
       name: displayName(item.name),
       imageFailed: false,
+      fallback: false,
     }))
-  } catch {
-    dealProducts.value = []
-    hotPreview.value = []
+  } else {
+    hotPreview.value = list.slice(0, 3).map((product) => ({
+      ...product,
+      productId: product.id,
+      salesQuantity: null,
+      fallback: true,
+    }))
   }
 }
 
 const startBanner = () => {
-  stopBanner()
+  if (bannerTimer) window.clearInterval(bannerTimer)
   bannerTimer = window.setInterval(() => {
-    if (!banners.value.length) return
-    currentBanner.value = (currentBanner.value + 1) % banners.value.length
-  }, 5000)
+    if (banners.value.length) currentBanner.value = (currentBanner.value + 1) % banners.value.length
+  }, 5600)
 }
 
 const stopBanner = () => {
-  if (bannerTimer) {
-    window.clearInterval(bannerTimer)
-    bannerTimer = undefined
-  }
+  if (bannerTimer) window.clearInterval(bannerTimer)
+  bannerTimer = undefined
 }
 
-const goBanner = (step) => {
-  const total = banners.value.length
-  if (!total) return
-  currentBanner.value = (currentBanner.value + step + total) % total
+const goBanner = (index) => {
+  currentBanner.value = index
   stopBanner()
   startBanner()
 }
-
-const prevBanner = () => goBanner(-1)
-const nextBanner = () => goBanner(1)
 
 onMounted(() => {
   void loadCategories()
   void loadDeals()
   startBanner()
 })
-
 onUnmounted(stopBanner)
-
-watch(
-  () => banners.value.length,
-  (length) => {
-    if (currentBanner.value >= length) currentBanner.value = 0
-  },
-)
+watch(() => banners.value.length, (length) => {
+  if (currentBanner.value >= length) currentBanner.value = 0
+})
 </script>
 
 <template>
   <div class="home-page">
+    <section class="home-intro">
+      <div>
+        <h1>买回去就会用上的好东西</h1>
+        <p>从设备到家居，先看清规格和库存，再做一件确定的购买决定。</p>
+      </div>
+      <button type="button" class="home-intro-link" @click="goCatalog()">查看全部商品</button>
+    </section>
+
     <section class="hero-stage">
       <aside class="channel-menu" v-loading="categoryLoading">
-        <header>
-          <strong>商品分类</strong>
-          <span>进入分类页</span>
-        </header>
+        <div class="channel-heading">
+          <span>按品类逛</span>
+          <small>{{ categories.length || 0 }} 个品类</small>
+        </div>
         <button
           v-for="channel in channelMenus"
           :key="channel.id"
@@ -232,805 +202,183 @@ watch(
           class="channel-item"
           @click="openCategory(channel.id)"
         >
-          <span class="channel-icon" aria-hidden="true">{{ channel.icon }}</span>
           <span class="channel-text">
             <b>{{ channel.name }}</b>
             <small>{{ channel.desc }}</small>
           </span>
-          <em>›</em>
         </button>
-        <button type="button" class="channel-all" @click="goCatalog()">
-          进入全部商品
-        </button>
+        <button type="button" class="channel-all" @click="goCatalog()">浏览全部品类</button>
       </aside>
 
-      <div
-        class="hero-banner"
-        :class="[`tone-${activeBanner.tone}`, `visual-${activeBanner.visual}`]"
-        @mouseenter="stopBanner"
-        @mouseleave="startBanner"
-        @click="openCampaign(activeBanner)"
-      >
+      <div class="hero-banner" @mouseenter="stopBanner" @mouseleave="startBanner">
+        <img class="hero-image" :src="activeBanner.image" alt="精选商品场景" />
+        <div class="hero-shade" aria-hidden="true"></div>
         <div class="hero-copy">
           <span class="hero-badge">{{ activeBanner.badge }}</span>
-          <h1>{{ activeBanner.title }}</h1>
+          <h2>{{ activeBanner.title }}</h2>
           <p>{{ activeBanner.subtitle }}</p>
-          <div class="hero-actions" @click.stop>
-            <el-button type="primary" size="large" round @click="openCampaign(activeBanner)">
-              {{ activeBanner.cta }}
-            </el-button>
-            <el-button size="large" round plain @click="goCatalog()">
-              全部商品
-            </el-button>
-          </div>
-          <p class="hero-target-tip">
-            将进入：
-            <template v-if="activeBanner.target?.type === 'category'">
-              {{ displayName(categories.find((c) => c.id === activeBanner.target.categoryId)?.name) || '分类会场' }}
-            </template>
-            <template v-else-if="activeBanner.target?.type === 'anchor'">热销榜专区</template>
-            <template v-else>全部商品页</template>
-          </p>
+          <button type="button" class="hero-cta" @click="openCampaign()">{{ activeBanner.cta }}</button>
         </div>
-        <button
-          type="button"
-          class="hero-arrow hero-arrow-prev"
-          aria-label="上一张广告"
-          @click.stop="prevBanner"
-        >
-          <span class="hero-arrow-icon" aria-hidden="true"></span>
-        </button>
-        <button
-          type="button"
-          class="hero-arrow hero-arrow-next"
-          aria-label="下一张广告"
-          @click.stop="nextBanner"
-        >
-          <span class="hero-arrow-icon" aria-hidden="true"></span>
-        </button>
-        <div class="hero-dots" @click.stop>
+        <div class="hero-controls" aria-label="精选内容切换">
           <button
             v-for="(item, index) in banners"
             :key="item.key"
             type="button"
             :class="{ active: currentBanner === index }"
-            :title="item.title"
-            @click="currentBanner = index"
-          />
+            :aria-label="`切换到${item.badge}`"
+            :aria-pressed="currentBanner === index"
+            @click="goBanner(index)"
+          ></button>
         </div>
       </div>
 
       <aside class="hero-side">
-        <div class="side-card deals">
+        <section class="side-section">
           <div class="side-heading">
-            <h3>库存紧张</h3>
-            <span>优先抢货</span>
+            <h2>库存提醒</h2>
+            <span>先到先得</span>
           </div>
-          <button
-            v-for="item in dealProducts"
-            :key="item.id"
-            type="button"
-            class="deal-row"
-            @click="openProduct(item.id)"
-          >
-            <span class="deal-thumb">
-              <img
-                v-if="item.mainImage && !item.imageFailed"
-                :src="item.mainImage"
-                :alt="item.name"
-                @error="item.imageFailed = true"
-              />
-              <em v-else>STARX</em>
-            </span>
+          <button v-for="item in dealProducts" :key="item.id" type="button" class="deal-row" @click="openProduct(item.id)">
+            <img
+              v-if="!item.imageFailed"
+              :src="productImageSrc(item)"
+              :alt="item.name"
+              @error="(event) => { if (event?.currentTarget?.dataset?.fallbackApplied === 'true') item.imageFailed = true; else restoreProductImage(event, item) }"
+            />
+            <span v-else class="deal-fallback">STARX</span>
             <span class="deal-info">
               <b>{{ item.name }}</b>
-              <small>仅剩 {{ item.totalStock }} 件</small>
+              <small>库存 {{ item.totalStock }} 件</small>
               <strong>{{ formatMoney(item.minPrice) }}</strong>
             </span>
           </button>
-          <p v-if="!dealProducts.length" class="side-empty">暂无推荐，稍后再来</p>
-        </div>
+          <p v-if="!dealProducts.length" class="side-empty">
+            {{ dealProductsError ? '商品信息暂时不可用' : '暂无库存提醒' }}
+          </p>
+        </section>
 
-        <div class="side-card hot-side">
+        <section class="side-section hot-side">
           <div class="side-heading">
-            <h3>热卖快达</h3>
-            <button type="button" class="linkish" @click="scrollToHot">完整榜单</button>
+            <h2>热销榜</h2>
+            <button type="button" class="linkish" @click="scrollToHot">看完整榜单</button>
           </div>
-          <button
-            v-for="(item, index) in hotPreview"
-            :key="item.productId"
-            type="button"
-            class="deal-row"
-            @click="openProduct(item.productId)"
-          >
-            <span class="rank-no" :class="{ top: index === 0 }">{{ index + 1 }}</span>
+          <button v-for="(item, index) in hotPreview" :key="item.productId" type="button" class="hot-row" @click="openProduct(item.productId)">
+            <span class="rank-no">{{ String(index + 1).padStart(2, '0') }}</span>
             <span class="deal-info">
               <b>{{ item.name }}</b>
-              <small>已售 {{ item.salesQuantity }} 件</small>
+              <small>{{ item.fallback ? '为你推荐' : `已售 ${item.salesQuantity} 件` }}</small>
               <strong>{{ formatMoney(item.minPrice) }}</strong>
             </span>
           </button>
-          <p v-if="!hotPreview.length" class="side-empty">暂无热销数据</p>
-        </div>
+          <p v-if="!hotPreview.length" class="side-empty">
+            {{ hotPreviewError ? '热销数据暂时不可用' : '暂无热销商品' }}
+          </p>
+        </section>
       </aside>
     </section>
 
-    <div id="hot-ranking" class="hot-anchor">
-      <HotProductRanking :limit="5" />
-    </div>
-
-    <section class="home-entry">
-      <div>
-        <p class="eyebrow">PRODUCT MALL</p>
-        <h2>逛全部商品</h2>
-        <p>按分类筛选、关键词搜索，挑齐你想要的好物。</p>
+    <section id="hot-ranking" class="hot-section">
+      <div class="section-heading">
+        <div>
+          <h2>近 30 天热销榜</h2>
+        </div>
+        <p>按已支付、已发货和已完成订单销量排序</p>
       </div>
-      <el-button type="primary" size="large" round @click="goCatalog()">
-        进入全部商品
-      </el-button>
+      <HotProductRanking :limit="5" :show-header="false" />
     </section>
 
-    <section class="promise-strip">
-      <article>
-        <strong>正品保障</strong>
-        <span>规格透明可查</span>
-      </article>
-      <article>
-        <strong>极速发货</strong>
-        <span>库存实时锁定</span>
-      </article>
-      <article>
-        <strong>安心支付</strong>
-        <span>全链路状态追踪</span>
-      </article>
-      <article>
-        <strong>售后服务</strong>
-        <span>订单记录可回溯</span>
-      </article>
+    <section class="home-guides">
+      <div class="guide-main">
+        <h2>每一件商品，先看清再下单。</h2>
+        <p>商品详情、SKU 规格、实时库存和订单状态都在同一条路径里，少一点猜测，多一点确定。</p>
+        <button type="button" class="guide-link" @click="goCatalog()">开始挑选</button>
+      </div>
+      <div class="guide-list">
+        <article><span><b>规格透明</b><small>多规格价格与库存分开呈现</small></span></article>
+        <article><span><b>库存状态</b><small>无货规格会直接阻止误购</small></span></article>
+        <article><span><b>订单可追</b><small>支付、发货和收货状态都有记录</small></span></article>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped>
-.home-page {
-  width: min(var(--eshop-container, 1280px), calc(100% - 40px));
-  margin: 0 auto;
-  padding: 8px 0 48px;
-}
-
-.hero-stage {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 268px;
-  gap: 14px;
-  margin-bottom: 22px;
-  min-height: 360px;
-}
-
-.channel-menu {
-  display: flex;
-  flex-direction: column;
-  padding: 16px 12px 12px;
-  background: linear-gradient(180deg, #faf6f2 0%, #fff 48%);
-  border: 1px solid var(--eshop-border, #ebe4de);
-  border-radius: 18px;
-  box-shadow: var(--eshop-shadow-sm, 0 4px 16px rgba(28, 20, 16, .04));
-}
-
-.channel-menu header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 8px 14px;
-  border-bottom: 1px solid #f0ebe6;
-  margin-bottom: 8px;
-}
-
-.channel-menu header strong {
-  color: #1c1917;
-  font-size: 15px;
-  letter-spacing: .02em;
-}
-
-.channel-menu header span {
-  color: #b8b0a8;
-  font-size: 11px;
-}
-
-.channel-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px 10px;
-  text-align: left;
-  background: transparent;
-  border: 0;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: .18s ease;
-}
-
-.channel-item:hover {
-  background: #fff1f0;
-}
-
-.channel-icon {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  background: #fff;
-  border: 1px solid #f0ebe6;
-  border-radius: 11px;
-  font-size: 16px;
-  box-shadow: 0 2px 8px rgba(28, 20, 16, .03);
-}
-
-.channel-text {
-  display: grid;
-  min-width: 0;
-  flex: 1;
-  gap: 2px;
-}
-
-.channel-text b {
-  color: #1c1917;
-  font-size: 14px;
-  font-weight: 650;
-}
-
-.channel-text small {
-  color: #8a837c;
-  font-size: 11px;
-}
-
-.channel-item em {
-  color: #d6cfc7;
-  font-style: normal;
-  font-size: 16px;
-}
-
-.channel-all {
-  margin-top: auto;
-  padding: 11px;
-  color: #ff4d4f;
-  background: #fff1f0;
-  border: 0;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .18s ease;
-}
-
-.channel-all:hover {
-  background: #ffe4e1;
-}
-
-.hero-banner {
-  position: relative;
-  min-height: 360px;
-  overflow: hidden;
-  padding: 40px 40px 56px;
-  border-radius: 18px;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 18px 48px rgba(28, 20, 16, .12);
-}
-
-.hero-banner.tone-red {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, .22), transparent 30%),
-    linear-gradient(128deg, #ff4d4f 0%, #ff6b4a 52%, #e03638 100%);
-}
-
-.hero-banner.tone-ink {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255, 77, 79, .18), transparent 32%),
-    linear-gradient(128deg, #2a2522 0%, #3f3833 55%, #1c1917 100%);
-}
-
-.hero-banner.tone-cream {
-  color: #1c1917;
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255, 77, 79, .12), transparent 30%),
-    linear-gradient(128deg, #f7efe8 0%, #efe2d6 55%, #e8d5c6 100%);
-  box-shadow: 0 18px 48px rgba(28, 20, 16, .08);
-}
-
-.hero-banner.tone-dark {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255, 107, 74, .28), transparent 32%),
-    linear-gradient(128deg, #1c1917 0%, #3a342f 100%);
-}
-
-.hero-banner.visual-phone::after,
-.hero-banner.visual-computer::after,
-.hero-banner.visual-home::after,
-.hero-banner.visual-hot::after {
-  position: absolute;
-  right: 28px;
-  bottom: 24px;
-  opacity: .14;
-  font-size: 108px;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.hero-banner.visual-phone::after { content: "📱"; }
-.hero-banner.visual-computer::after { content: "💻"; }
-.hero-banner.visual-home::after { content: "🏠"; }
-.hero-banner.visual-hot::after { content: "🔥"; }
-
-.hero-badge {
-  display: inline-flex;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, .18);
-  border: 1px solid rgba(255, 255, 255, .28);
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .04em;
-}
-
-.tone-cream .hero-badge {
-  color: #cf1322;
-  background: rgba(255, 255, 255, .7);
-  border-color: rgba(255, 77, 79, .18);
-}
-
-.hero-copy h1 {
-  max-width: 440px;
-  margin: 16px 0 12px;
-  font-size: clamp(30px, 3.8vw, 42px);
-  line-height: 1.15;
-  letter-spacing: -.03em;
-  font-weight: 800;
-  text-wrap: balance;
-}
-
-.hero-copy > p {
-  max-width: 420px;
-  margin: 0;
-  color: rgba(255, 255, 255, .9);
-  font-size: 14px;
-  line-height: 1.75;
-}
-
-.tone-cream .hero-copy > p {
-  color: #5c564f;
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 26px;
-}
-
-.hero-actions :deep(.el-button--primary) {
-  --el-button-bg-color: #fff;
-  --el-button-border-color: #fff;
-  --el-button-text-color: #cf1322;
-  --el-button-hover-bg-color: #fff1f0;
-  --el-button-hover-border-color: #fff1f0;
-  --el-button-hover-text-color: #cf1322;
-}
-
-.tone-cream .hero-actions :deep(.el-button--primary) {
-  --el-button-bg-color: #ff4d4f;
-  --el-button-border-color: #ff4d4f;
-  --el-button-text-color: #fff;
-  --el-button-hover-bg-color: #ff7875;
-  --el-button-hover-border-color: #ff7875;
-  --el-button-hover-text-color: #fff;
-}
-
-.hero-actions :deep(.el-button.is-plain) {
-  --el-button-bg-color: transparent;
-  --el-button-border-color: rgba(255, 255, 255, .55);
-  --el-button-text-color: #fff;
-  --el-button-hover-bg-color: rgba(255, 255, 255, .12);
-  --el-button-hover-border-color: #fff;
-  --el-button-hover-text-color: #fff;
-}
-
-.tone-cream .hero-actions :deep(.el-button.is-plain) {
-  --el-button-border-color: rgba(28, 25, 23, .22);
-  --el-button-text-color: #1c1917;
-  --el-button-hover-bg-color: rgba(28, 25, 23, .04);
-  --el-button-hover-border-color: #1c1917;
-  --el-button-hover-text-color: #1c1917;
-}
-
-.hero-target-tip {
-  margin: 16px 0 0 !important;
-  color: rgba(255, 255, 255, .72) !important;
-  font-size: 12px !important;
-}
-
-.tone-cream .hero-target-tip {
-  color: #8a837c !important;
-}
-
-.hero-arrow {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin: auto 0;
-  padding: 0;
-  color: #fff;
-  background: rgba(28, 25, 23, .32);
-  border: 1px solid rgba(255, 255, 255, .4);
-  border-radius: 50%;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
-  transition: opacity .2s ease, background .18s ease, transform .15s ease, border-color .18s ease;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* 仅鼠标悬停在广告区域时显示箭头 */
-.hero-banner:hover .hero-arrow {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.hero-arrow:hover {
-  background: #ff4d4f;
-  border-color: #ff4d4f;
-  transform: scale(1.06);
-}
-
-.hero-arrow:active {
-  transform: scale(0.96);
-}
-
-.hero-arrow-prev {
-  left: 16px;
-}
-
-.hero-arrow-next {
-  right: 16px;
-}
-
-/* 用边框画居中箭头，避免字符基线偏移 */
-.hero-arrow-icon {
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  box-sizing: border-box;
-}
-
-.hero-arrow-prev .hero-arrow-icon {
-  margin-left: 3px;
-  transform: rotate(-135deg);
-}
-
-.hero-arrow-next .hero-arrow-icon {
-  margin-right: 3px;
-  transform: rotate(45deg);
-}
-
-.tone-cream .hero-arrow {
-  color: #1c1917;
-  background: rgba(255, 255, 255, .82);
-  border-color: rgba(28, 25, 23, .1);
-}
-
-.tone-cream .hero-arrow:hover {
-  color: #fff;
-  background: #ff4d4f;
-  border-color: #ff4d4f;
-}
-
-.hero-dots {
-  position: absolute;
-  left: 40px;
-  bottom: 20px;
-  display: flex;
-  gap: 8px;
-}
-
-.hero-dots button {
-  width: 22px;
-  height: 4px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .35);
-  cursor: pointer;
-  transition: .18s ease;
-}
-
-.tone-cream .hero-dots button {
-  background: rgba(28, 25, 23, .18);
-}
-
-.hero-dots button.active {
-  width: 34px;
-  background: #fff;
-}
-
-.tone-cream .hero-dots button.active {
-  background: #ff4d4f;
-}
-
-.hero-side {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
-  min-height: 0;
-}
-
-.side-card {
-  min-height: 0;
-  padding: 16px;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid var(--eshop-border, #ebe4de);
-  border-radius: 18px;
-  box-shadow: var(--eshop-shadow-sm, 0 4px 16px rgba(28, 20, 16, .04));
-}
-
-.side-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.side-heading h3 {
-  margin: 0;
-  font-size: 15px;
-  letter-spacing: .01em;
-}
-
-.side-heading span,
-.linkish {
-  color: #ff4d4f;
-  background: none;
-  border: 0;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-}
-
-.deal-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 7px;
-  text-align: left;
-  background: #faf7f5;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: .18s ease;
-}
-
-.deal-row:last-child {
-  margin-bottom: 0;
-}
-
-.deal-row:hover {
-  border-color: #ffd6d2;
-  background: #fff1f0;
-}
-
-.deal-thumb {
-  display: grid;
-  flex: 0 0 46px;
-  width: 46px;
-  height: 46px;
-  place-items: center;
-  overflow: hidden;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0ebe6;
-}
-
-.deal-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.deal-thumb em {
-  color: #ffccc7;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 800;
-}
-
-.deal-info {
-  display: grid;
-  min-width: 0;
-  flex: 1;
-  gap: 2px;
-}
-
-.deal-info b {
-  overflow: hidden;
-  color: #1c1917;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.deal-info small {
-  color: #8a837c;
-  font-size: 11px;
-}
-
-.deal-info strong {
-  color: #ff4d4f;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.rank-no {
-  display: grid;
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  place-items: center;
-  color: #fff;
-  background: #c4bbb2;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.rank-no.top {
-  background: #ff4d4f;
-}
-
-.side-empty {
-  margin: 18px 0 0;
-  color: #b8b0a8;
-  font-size: 12px;
-  text-align: center;
-}
-
-.hot-anchor {
-  scroll-margin-top: 140px;
-}
-
-.home-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin: 10px 0 24px;
-  padding: 30px 34px;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(255, 77, 79, .08), transparent 36%),
-    #fff;
-  border: 1px solid var(--eshop-border, #ebe4de);
-  border-radius: 18px;
-  box-shadow: var(--eshop-shadow-sm, 0 4px 16px rgba(28, 20, 16, .04));
-}
-
-.home-entry .eyebrow {
-  margin: 0 0 6px;
-  color: #ff4d4f;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .14em;
-}
-
-.home-entry h2 {
-  margin: 0 0 8px;
-  font-size: 26px;
-  letter-spacing: -.02em;
-}
-
-.home-entry p {
-  margin: 0;
-  color: #8a837c;
-  font-size: 14px;
-}
-
-.promise-strip {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  padding: 8px 6px;
-  background: #fff;
-  border: 1px solid var(--eshop-border, #ebe4de);
-  border-radius: 18px;
-  box-shadow: var(--eshop-shadow-sm, 0 4px 16px rgba(28, 20, 16, .04));
-  overflow: hidden;
-}
-
-.promise-strip article {
-  display: grid;
-  gap: 4px;
-  padding: 18px 20px;
-  border-right: 1px solid #f0ebe6;
-}
-
-.promise-strip article:last-child {
-  border-right: 0;
-}
-
-.promise-strip strong {
-  color: #1c1917;
-  font-size: 14px;
-}
-
-.promise-strip span {
-  color: #8a837c;
-  font-size: 12px;
-}
-
-@media (max-width: 1100px) {
-  .hero-stage {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .channel-menu {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .channel-menu header,
-  .channel-all {
-    grid-column: 1 / -1;
-  }
-
-  .hero-banner {
-    grid-column: 1 / -1;
-  }
-
-  .hero-side {
-    grid-column: 1 / -1;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: none;
-  }
-}
-
-@media (max-width: 760px) {
-  .hero-banner {
-    min-height: 250px;
-    padding: 28px 22px 70px;
-  }
-
-  .hero-side,
-  .channel-menu {
-    grid-template-columns: 1fr;
-  }
-
-  .home-entry {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .promise-strip {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .promise-strip article {
-    border-right: 0;
-    border-bottom: 1px solid #f0ebe6;
-  }
-}
+.home-page { width: min(var(--eshop-container), calc(100% - 40px)); margin: 0 auto; padding: 28px 0 80px; }
+.home-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 12px 0 30px; }
+.home-intro h1 { max-width: 620px; margin: 0; color: var(--eshop-text); font-size: 48px; line-height: 1.12; }
+.home-intro p:not(.home-kicker) { max-width: 540px; margin: 14px 0 0; color: var(--eshop-muted); font-size: 15px; line-height: 1.7; }
+.home-intro-link, .guide-link, .linkish { padding: 0; color: var(--eshop-primary); background: none; border: 0; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
+.hero-stage { display: grid; grid-template-columns: 212px minmax(0, 1fr) 264px; gap: 14px; min-height: 430px; }
+.channel-menu, .side-section { background: #fff; border: 1px solid var(--eshop-border); border-radius: var(--eshop-radius); box-shadow: none; }
+.channel-menu { display: flex; flex-direction: column; padding: 18px 14px 14px; }
+.channel-heading, .side-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.channel-heading { padding: 0 8px 14px; border-bottom: 1px solid var(--eshop-border); }
+.channel-heading span, .side-heading h2 { color: var(--eshop-text); font-size: 15px; font-weight: 800; }
+.channel-heading small, .side-heading > span { color: var(--eshop-muted); font-size: 11px; }
+.channel-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 17px 8px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--eshop-border); cursor: pointer; transition: color .18s ease, background-color .18s ease; }
+.channel-item:hover { background: var(--eshop-surface-soft); }
+.channel-text { display: grid; flex: 1; min-width: 0; gap: 4px; }
+.channel-text b { color: var(--eshop-text); font-size: 14px; }
+.channel-text small { color: var(--eshop-muted); font-size: 11px; }
+.channel-all { margin-top: auto; padding: 12px 10px; color: var(--eshop-primary); background: var(--eshop-primary-soft); border: 0; border-radius: 8px; font-size: 13px; font-weight: 750; cursor: pointer; }
+.hero-banner { position: relative; min-height: 430px; overflow: hidden; border-radius: var(--eshop-radius); background: var(--eshop-ink); isolation: isolate; }
+.hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: -2; }
+.hero-shade { position: absolute; inset: 0; z-index: -1; background: rgba(36, 35, 33, .46); }
+.hero-copy { max-width: 460px; padding: 58px 44px; color: #fff; }
+.hero-badge { display: inline-flex; padding: 6px 10px; color: #fff; border: 1px solid rgba(255, 255, 255, .38); border-radius: 999px; font-size: 11px; font-weight: 750; }
+.hero-copy h2 { max-width: 390px; margin: 18px 0 12px; color: #fff !important; font-size: 44px; line-height: 1.12; }
+.hero-copy p { max-width: 360px; margin: 0; color: rgba(255, 255, 255, .78); font-size: 14px; line-height: 1.7; }
+.hero-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; padding: 12px 17px; color: #fff; background: var(--eshop-primary); border: 0; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: background .2s ease; }
+.hero-cta:hover { background: var(--eshop-primary-strong); }
+.hero-controls { position: absolute; right: 28px; bottom: 26px; display: flex; gap: 8px; }
+.hero-controls button { width: 24px; height: 4px; padding: 0; background: rgba(255, 255, 255, .38); border: 0; border-radius: 99px; cursor: pointer; }
+.hero-controls button.active { background: #fff; }
+.hero-side { display: grid; grid-template-rows: 1fr 1fr; gap: 16px; }
+.side-section { min-width: 0; padding: 18px 16px; }
+.side-heading { margin-bottom: 12px; }
+.side-heading h2 { margin: 0; }
+.side-heading > span { color: var(--eshop-primary); font-weight: 700; }
+.deal-row, .hot-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 0; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--eshop-border); cursor: pointer; }
+.deal-row:last-of-type, .hot-row:last-of-type { border-bottom: 0; }
+.deal-row img, .deal-fallback { flex: 0 0 56px; width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--eshop-surface-soft); }
+.deal-fallback { display: grid; place-items: center; color: var(--eshop-primary); font-size: 10px; font-weight: 800; }
+.deal-info { display: grid; min-width: 0; gap: 3px; }
+.deal-info b { overflow: hidden; color: var(--eshop-text); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.deal-info small { color: var(--eshop-muted); font-size: 11px; }
+.deal-info strong { color: var(--eshop-primary); font-size: 13px; }
+.hot-row { align-items: flex-start; }
+.rank-no { flex: 0 0 28px; color: #94a3b8; font-size: 13px; font-weight: 800; line-height: 1.5; }
+.hot-row:first-of-type .rank-no { color: var(--eshop-primary); }
+.side-empty { margin: 22px 0 8px; color: var(--eshop-muted); font-size: 12px; text-align: center; }
+.hot-section { margin-top: 56px; scroll-margin-top: 130px; }
+.section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+.section-heading h2 { margin: 0; color: var(--eshop-text); font-size: 28px; }
+.section-heading > p { margin: 0 0 2px; color: var(--eshop-muted); font-size: 12px; }
+.home-guides { display: grid; grid-template-columns: 1.1fr .9fr; gap: 34px; margin-top: 62px; padding: 34px 0 0; border-top: 1px solid var(--eshop-border); }
+.guide-main h2 { max-width: 520px; margin: 0; color: var(--eshop-text); font-size: 36px; line-height: 1.16; }
+.guide-main > p:not(.section-kicker) { max-width: 520px; margin: 14px 0 22px; color: var(--eshop-muted); font-size: 14px; line-height: 1.75; }
+.guide-list { display: grid; gap: 0; }
+.guide-list article { padding: 15px 0; border-bottom: 1px solid var(--eshop-border); }
+.guide-list article:first-child { border-top: 1px solid var(--eshop-border); }
+.guide-list span { display: grid; gap: 3px; }
+.guide-list b { color: var(--eshop-text); font-size: 14px; }
+.guide-list small { color: var(--eshop-muted); font-size: 12px; }
+@media (max-width: 1080px) { .hero-stage { grid-template-columns: 190px minmax(0, 1fr); } .hero-side { display: none; } }
+@media (max-width: 720px) {
+  .home-page { width: min(100% - 28px, 600px); padding-top: 8px; }
+  .home-intro { display: block; padding-bottom: 22px; }
+  .home-intro h1 { font-size: 34px; }
+  .home-intro-link { display: inline-block; margin-top: 16px; }
+  .hero-stage { display: block; min-height: 0; }
+  .channel-menu { margin-bottom: 14px; }
+  .channel-item { padding: 12px 8px; }
+  .channel-all { margin-top: 12px; }
+  .hero-banner { min-height: 370px; }
+  .hero-copy { padding: 38px 26px; }
+  .hero-copy h2 { font-size: 34px; }
+  .section-heading { display: block; }
+  .section-heading > p { margin-top: 8px; }
+  .home-guides { grid-template-columns: 1fr; gap: 24px; margin-top: 46px; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-cta, .channel-item { transition: none; } }
 </style>

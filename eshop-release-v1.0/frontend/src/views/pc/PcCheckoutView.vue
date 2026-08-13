@@ -6,6 +6,7 @@ import { getAddresses } from '../../api/address'
 import { getCart } from '../../api/cart'
 import { createOrder } from '../../api/order'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const addresses = ref([])
@@ -155,8 +156,7 @@ onMounted(loadCheckout)
       <div v-if="validSelectedItems.length" class="checkout-products">
         <article v-for="item in validSelectedItems" :key="item.id">
           <div class="product-image">
-            <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-            <span v-else>E-Shop</span>
+            <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
           </div>
           <div class="product-info">
             <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
@@ -265,5 +265,107 @@ onMounted(loadCheckout)
   .checkout-products article > span, .checkout-products article > strong { grid-column: 2; text-align: left; }
   .submit-panel { align-items: stretch; flex-direction: column; }
   .submit-panel > div:first-child { margin-right: 0; }
+}
+.checkout-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.checkout-heading p,
+.checkout-heading ol {
+  display: none;
+}
+
+.checkout-heading h1 {
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.checkout-section {
+  padding: 26px 28px;
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.section-heading {
+  margin-bottom: 18px;
+}
+
+.section-heading > div {
+  gap: 0;
+}
+
+.section-heading > div > span {
+  display: none;
+}
+
+.section-heading h2 {
+  color: var(--eshop-text);
+  font-size: 19px;
+}
+
+.address-option {
+  border-radius: 10px;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+
+.address-option:hover {
+  border-color: #ffaaa8;
+}
+
+.address-option.active {
+  background: var(--eshop-primary-soft);
+  border-color: var(--eshop-primary);
+  box-shadow: 0 0 0 1px var(--eshop-primary);
+}
+
+.address-option > b {
+  color: var(--eshop-primary);
+}
+
+.checkout-products article {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  background: transparent !important;
+}
+
+.product-image {
+  background: var(--eshop-surface-soft);
+}
+
+.submit-panel {
+  position: sticky;
+  bottom: 16px;
+  z-index: 1;
+  padding: 22px 26px;
+  background: var(--eshop-ink);
+  border: 1px solid var(--eshop-ink);
+  border-radius: var(--eshop-radius);
+  box-shadow: 0 18px 34px rgba(12, 26, 46, .18);
+}
+
+.submit-panel .amount strong {
+  color: #ffb3b1;
+}
+
+.submit-panel .el-button {
+  min-width: 164px;
+}
+
+@media (max-width: 760px) {
+  .checkout-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .checkout-section {
+    padding: 20px 16px;
+  }
+
+  .submit-panel {
+    bottom: 12px;
+    padding: 18px;
+  }
 }
 </style>

@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
 const router = useRouter()
 const items = ref([])
@@ -163,8 +164,7 @@ onMounted(loadCart)
           />
           <div class="product-cell">
             <button class="product-image" type="button" @click="router.push(`/pc/products/${item.productId}`)">
-              <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
-              <span v-else>E-Shop</span>
+              <img :src="productImageSrc(item)" :alt="item.productName" @error="restoreProductImage($event, item)" />
             </button>
             <div>
               <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
@@ -258,5 +258,85 @@ onMounted(loadCart)
   .cart-summary { align-items: stretch; flex-direction: column; gap: 12px; }
   .cart-summary > span { margin-right: 0; }
   .cart-summary > div { justify-content: space-between; }
+}
+.page-heading {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-heading p {
+  display: none;
+}
+
+.page-heading h1 {
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.page-heading span {
+  margin-top: 6px;
+  color: var(--eshop-muted);
+  font-size: 14px;
+}
+
+.cart-card {
+  border-radius: var(--eshop-radius) !important;
+  box-shadow: var(--eshop-shadow-sm) !important;
+}
+
+.cart-columns {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  color: var(--eshop-muted);
+  background: var(--eshop-surface-soft) !important;
+}
+
+.cart-item {
+  background: var(--eshop-surface) !important;
+}
+
+.cart-item.invalid {
+  background: #fff8f7 !important;
+}
+
+.product-image {
+  background: var(--eshop-surface-soft);
+  border-radius: 10px;
+}
+
+.product-cell a:hover {
+  color: var(--eshop-primary);
+}
+
+.unit-price {
+  color: var(--eshop-text-soft);
+}
+
+.cart-summary {
+  min-height: 94px;
+  padding: 18px 24px;
+  background: var(--eshop-surface-soft);
+  border-top: 1px solid var(--eshop-border);
+}
+
+.cart-summary b,
+.cart-summary strong {
+  color: var(--eshop-primary);
+}
+
+.cart-summary .el-button {
+  min-width: 156px;
+}
+
+@media (max-width: 980px) {
+  .cart-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .page-heading {
+    gap: 12px;
+  }
 }
 </style>

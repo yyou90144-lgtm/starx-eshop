@@ -242,4 +242,27 @@ onMounted(refreshProfile)
 .form-body {
   padding: 8px 12px 4px;
 }
+.mobile-profile {
+  background: var(--eshop-bg);
+}
+
+.notice-action {
+  color: var(--eshop-primary);
+}
+
+.profile-card {
+  background: var(--eshop-ink);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(12, 26, 46, .16);
+}
+
+.profile-avatar {
+  background: var(--eshop-primary);
+  border-color: rgba(255, 255, 255, .24);
+  border-radius: 10px;
+}
+
+.profile-menu {
+  margin-bottom: 20px;
+}
 </style>

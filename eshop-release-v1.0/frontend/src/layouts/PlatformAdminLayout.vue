@@ -14,9 +14,9 @@ const logout = async () => {
 
 <template>
   <el-container class="admin-shell platform-shell">
-    <el-aside width="220px" class="admin-aside">
+    <el-aside width="236px" class="admin-aside">
       <h1><span>E</span>-Shop 平台</h1>
-      <el-menu router :default-active="route.path">
+      <el-menu router :default-active="route.path" class="workspace-menu">
         <el-menu-item index="/">统一入口</el-menu-item>
         <el-menu-item index="/admin/users">买家与卖家</el-menu-item>
       </el-menu>

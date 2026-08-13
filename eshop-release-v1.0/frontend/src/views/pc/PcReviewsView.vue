@@ -65,4 +65,39 @@ header span {
     flex-direction: column;
   }
 }
+.reviews-page {
+  padding-top: 8px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+header {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+header p {
+  display: none;
+}
+
+header h1 {
+  margin-bottom: 6px;
+  color: var(--eshop-text);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+header span {
+  color: var(--eshop-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .reviews-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
 </style>

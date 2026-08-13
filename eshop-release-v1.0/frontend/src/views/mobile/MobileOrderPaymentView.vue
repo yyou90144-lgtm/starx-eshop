@@ -92,8 +92,8 @@ watch(() => route.params.id, loadOrder, { immediate: true })
           v-if="isPending"
           left-icon="info-o"
           text="这是课程项目的模拟支付，不会产生真实扣款。待支付订单会在 30 分钟后自动取消。"
-          color="#1d4ed8"
-          background="#eff6ff"
+          color="#b42318"
+          background="#fff1f0"
         />
         <van-notice-bar
           v-else-if="!hasPaid"
@@ -215,4 +215,50 @@ watch(() => route.params.id, loadOrder, { immediate: true })
 .action-bar .van-button + .van-button { margin-top: 0; }
 
 .loading { display: block; margin: 32px auto; }
+.mobile-payment {
+  background: var(--eshop-bg);
+}
+
+.payment-card {
+  padding-top: 28px;
+  border-color: var(--eshop-border);
+  border-radius: 12px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.payment-card.success {
+  border-color: var(--eshop-border);
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.payment-icon,
+.payment-card > p {
+  display: none;
+}
+
+.payment-card h1 {
+  color: var(--eshop-text);
+  font-size: 21px;
+  line-height: 1.35;
+}
+
+.payment-amount {
+  background: var(--eshop-surface-soft);
+  border-radius: 10px;
+}
+
+.payment-amount strong {
+  color: var(--eshop-primary);
+}
+
+.payment-receipt {
+  border-color: var(--eshop-border);
+  border-radius: 10px;
+  box-shadow: var(--eshop-shadow-sm);
+}
+
+.action-bar {
+  background: var(--eshop-surface);
+  border-top: 1px solid var(--eshop-border);
+}
 </style>
