@@ -28,11 +28,12 @@
 
 ```
 ├── README.md
-├── docs/                 # 需求、设计、测试与交付文档
-├── frontend/             # PC / 管理端 / 手机 H5
-├── backend/              # Spring Boot API 与迁移
-├── android/              # 原生 Android 客户端
-├── scripts/              # 启动、停止与 API 冒烟脚本
+├── docs/                 # 产品范围、需求、架构、接口、测试与交付总结
+├── frontend/             # PC 商城 / 平台与商家 / 手机 H5
+├── backend/              # Spring Boot API 与 Flyway 迁移
+├── android/              # 原生 Android 客户端（增强）
+├── scripts/              # 启动、停止与 API 冒烟
+├── reports/              # 可选：工程日志与迭代纪要
 ├── docker-compose.yml
 └── .env.example
 ```
