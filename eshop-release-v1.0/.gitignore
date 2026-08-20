@@ -21,3 +21,20 @@ android/local.properties
 android/**/build/
 android/*.apk
 android/*.aab
+
+# Media assets (local only; not for GitHub)
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.bmp
+*.ico
+*.svg
+*.mp4
+*.webm
+backend/src/main/resources/static/demo/
+frontend/public/demo/
+frontend/public/images/
+android/app/src/main/res/drawable*/
+android/app/src/main/res/drawable-nodpi/

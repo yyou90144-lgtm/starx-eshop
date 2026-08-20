@@ -34,6 +34,10 @@ const COLOR_SWATCH = {
   祥云白: '#f3f3f3',
   阳光橙: '#e8883a',
   海风蓝: '#7eb8d8',
+  天际蓝: '#4d7fb8',
+  太空银: '#c9ced6',
+  星辰灰: '#6b7078',
+  碳晶黑: '#1a1a1a',
   深空黑: '#1f1f21',
   星河银: '#c8cdd3',
   云朵白: '#f7f7f7',
@@ -52,11 +56,12 @@ const DIM_LABEL = {
   外观: '外观',
   存储容量: '存储容量',
   容量: '存储容量',
+  处理器: '处理器',
   内存: '内存',
   硬盘: '硬盘',
 }
 
-const DIM_ORDER = ['颜色', '外观', '存储容量', '容量', '内存', '硬盘']
+const DIM_ORDER = ['颜色', '外观', '处理器', '存储容量', '容量', '内存', '硬盘']
 
 const selectedSku = computed(() => product.value?.skus.find((sku) => sku.id === selectedSkuId.value) || null)
 const maxQuantity = computed(() => Math.min(selectedSku.value?.stock || 0, 99))
@@ -390,13 +395,6 @@ watch(() => route.params.id, loadProduct, { immediate: true })
                 <b>{{ item.value }}</b>
               </div>
             </div>
-            <div v-if="detailContent.detailImages.length" class="detail-images">
-              <h3>图文详情</h3>
-              <figure v-for="(image, index) in detailContent.detailImages" :key="`${image}-${index}`">
-                <img :src="image" :alt="`${product.name} 详情图 ${index + 1}`" loading="lazy" />
-                <figcaption v-if="isPlaceholderImage(image)">详情图占位，后续可替换为实拍/详情长图</figcaption>
-              </figure>
-            </div>
           </article>
           <aside class="buy-notes">
             <h2>购买说明</h2>
@@ -404,6 +402,28 @@ watch(() => route.params.id, loadProduct, { immediate: true })
             <p><b>订单追踪</b>支付、发货、收货状态可在订单中心查看。</p>
             <p><b>评价参考</b>完成收货后可查看和提交商品评价。</p>
           </aside>
+        </section>
+
+        <!-- 小米式无缝图文长图：独立全宽条，避免卡片边框造成拼缝 -->
+        <section
+          v-if="detailContent.detailImages.length"
+          class="detail-longform"
+          aria-label="图文详情"
+        >
+          <header class="detail-longform-head">
+            <h2>图文详情</h2>
+            <p>向下滑动查看完整介绍</p>
+          </header>
+          <div class="detail-longform-strip">
+            <img
+              v-for="(image, index) in detailContent.detailImages"
+              :key="`${image}-${index}`"
+              :src="image"
+              :alt="`${product.name} 详情 ${index + 1}`"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </section>
 
         <ProductReviewList :product-id="product.id" />
@@ -419,6 +439,10 @@ watch(() => route.params.id, loadProduct, { immediate: true })
           </div>
           <h1>{{ displayName(product.name) }}</h1>
           <p>{{ product.subtitle || '查看商品规格、价格和库存信息' }}</p>
+          <div v-if="detailContent.learningNote || detailContent.sourceNote" class="learning-note">
+            <span v-if="detailContent.learningNote">{{ detailContent.learningNote }}</span>
+            <small v-if="detailContent.sourceNote">{{ detailContent.sourceNote }}</small>
+          </div>
         </div>
 
         <div class="price-panel">
@@ -720,6 +744,23 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 .purchase-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .purchase-actions :deep(.el-button) { min-height: 44px; width: 100%; border-radius: 8px; font-weight: 800; }
 .purchase-hint { margin: 12px 0 0; color: var(--eshop-muted); font-size: 12px; line-height: 1.6; }
+.learning-note {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px dashed #f0c2c2;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #9a3b3b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.learning-note small {
+  color: #a86464;
+  font-size: 11px;
+  word-break: break-all;
+}
 .detail-content {
   display: grid;
   gap: 18px;
@@ -738,10 +779,51 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 .spec-row:first-child { border-top: 0; }
 .spec-row span { color: var(--eshop-muted); }
 .spec-row b { color: var(--eshop-text); font-weight: 700; }
-.detail-images { display: grid; gap: 14px; margin-top: 8px; }
-.detail-images figure { margin: 0; overflow: hidden; border: 1px solid var(--eshop-border); border-radius: 8px; background: var(--eshop-surface-soft); }
-.detail-images img { width: 100%; display: block; object-fit: cover; }
-.detail-images figcaption { padding: 8px 12px; color: var(--eshop-muted); font-size: 12px; }
+.detail-longform {
+  margin-top: 8px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--eshop-border);
+  border-radius: var(--eshop-radius);
+}
+.detail-longform-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--eshop-border);
+}
+.detail-longform-head h2 {
+  margin: 0;
+  color: var(--eshop-text);
+  font-size: 18px;
+}
+.detail-longform-head p {
+  margin: 0;
+  color: var(--eshop-muted);
+  font-size: 12px;
+}
+.detail-longform-strip {
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  background: #fff;
+  font-size: 0;
+}
+.detail-longform-strip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  vertical-align: top;
+  object-fit: fill;
+  background: #fff;
+}
 .buy-notes {
   padding: 16px;
   background: var(--eshop-surface-soft);

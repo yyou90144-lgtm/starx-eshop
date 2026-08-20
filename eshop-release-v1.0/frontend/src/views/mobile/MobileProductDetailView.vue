@@ -33,6 +33,10 @@ let requestSequence = 0
 
 const COLOR_SWATCH = {
   暗影黑: '#2b2b2e',
+  天际蓝: '#4d7fb8',
+  太空银: '#c9ced6',
+  星辰灰: '#6b7078',
+  碳晶黑: '#1a1a1a',
   祥云白: '#f3f3f3',
   阳光橙: '#e8883a',
   海风蓝: '#7eb8d8',
@@ -54,11 +58,12 @@ const DIM_LABEL = {
   外观: '外观',
   存储容量: '存储容量',
   容量: '存储容量',
+  处理器: '处理器',
   内存: '内存',
   硬盘: '硬盘',
 }
 
-const DIM_ORDER = ['颜色', '外观', '存储容量', '容量', '内存', '硬盘']
+const DIM_ORDER = ['颜色', '外观', '处理器', '存储容量', '容量', '内存', '硬盘']
 
 const selectedSku = computed(() => {
   if (!product.value || selectedSkuId.value === null) return null
@@ -438,6 +443,10 @@ watch(() => route.params.id, loadProduct, { immediate: true })
         </div>
         <h1>{{ product.name }}</h1>
         <p>{{ product.subtitle || '品质商品，放心选购' }}</p>
+        <div v-if="detailContent.learningNote || detailContent.sourceNote" class="learning-note">
+          <span v-if="detailContent.learningNote">{{ detailContent.learningNote }}</span>
+          <small v-if="detailContent.sourceNote">{{ detailContent.sourceNote }}</small>
+        </div>
         <van-tag v-if="product.categoryName" type="primary" plain>
           {{ product.categoryName }}
         </van-tag>
@@ -540,17 +549,28 @@ watch(() => route.params.id, loadProduct, { immediate: true })
             <b>{{ item.value }}</b>
           </div>
         </div>
-        <div v-if="detailContent.detailImages.length" class="detail-images">
-          <p class="detail-images-title">图文详情</p>
+      </div>
+
+      <section
+        v-if="detailContent.detailImages.length"
+        class="detail-longform"
+        aria-label="图文详情"
+      >
+        <div class="detail-longform-head">
+          <span>图文详情</span>
+          <small>向下滑动查看完整介绍</small>
+        </div>
+        <div class="detail-longform-strip">
           <img
             v-for="(image, index) in detailContent.detailImages"
             :key="`${image}-${index}`"
             :src="image"
-            :alt="`${product.name} 详情图 ${index + 1}`"
+            :alt="`${product.name} 详情 ${index + 1}`"
             loading="lazy"
+            decoding="async"
           />
         </div>
-      </div>
+      </section>
 
       <ProductReviewList :product-id="product.id" :page-size="5" />
 
@@ -705,6 +725,25 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   margin-top: 0;
   border-radius: 0 0 12px 12px;
   border-top: 0;
+}
+
+.learning-note {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border: 1px dashed #f0c2c2;
+  border-radius: 10px;
+  background: #fff7f7;
+  color: #9a3b3b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.learning-note small {
+  color: #a86464;
+  font-size: 11px;
+  word-break: break-all;
 }
 
 .price-panel {
@@ -941,26 +980,53 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   font-weight: 700;
 }
 
-.detail-images {
-  display: grid;
-  gap: 10px;
-  margin-top: 4px;
+.detail-longform {
+  margin: 12px 0 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e1dd;
+  border-radius: 14px;
 }
 
-.detail-images-title {
-  margin: 0;
+.detail-longform-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-longform-head span {
   color: #2b2a27;
   font-size: 14px;
   font-weight: 800;
 }
 
-.detail-images img {
-  width: 100%;
-  display: block;
-  border-radius: 8px;
-  border: 1px solid #e2e1dd;
+.detail-longform-head small {
+  color: #8a8780;
+  font-size: 12px;
+}
+
+.detail-longform-strip {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
   background: #fff;
-  object-fit: contain;
+}
+
+.detail-longform-strip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  vertical-align: top;
+  object-fit: fill;
+  background: #fff;
 }
 
 .service-row {

@@ -1,0 +1,87 @@
+# Low-memory server stack (isolated project name: starx-eshop)
+# Usage: docker compose -p starx-eshop -f docker-compose.server.yml up -d --build
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-eshop}
+      MYSQL_USER: ${MYSQL_USER:-eshop}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-eshop123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=96M
+      - --innodb-log-buffer-size=8M
+      - --performance-schema=OFF
+      - --max-connections=50
+      - --table-open-cache=200
+    volumes:
+      - starx_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root123456}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    mem_limit: 350m
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.runtime
+    # only localhost on host; public traffic goes through frontend nginx
+    ports:
+      - "127.0.0.1:18080:8080"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-eshop}
+      MYSQL_USER: ${MYSQL_USER:-eshop}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-eshop123}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      CORS_ALLOWED_ORIGIN_PATTERNS: ${CORS_ALLOWED_ORIGIN_PATTERNS:-http://120.79.134.190:8088,http://localhost:*}
+      BOOTSTRAP_ADMIN_ENABLED: ${BOOTSTRAP_ADMIN_ENABLED:-true}
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NICKNAME: ${BOOTSTRAP_ADMIN_NICKNAME:-系统管理员}
+      ORDER_TIMEOUT_ENABLED: ${ORDER_TIMEOUT_ENABLED:-true}
+      ORDER_TIMEOUT_MINUTES: ${ORDER_TIMEOUT_MINUTES:-30}
+      ORDER_TIMEOUT_BATCH_SIZE: ${ORDER_TIMEOUT_BATCH_SIZE:-100}
+      ORDER_TIMEOUT_INITIAL_DELAY_MS: ${ORDER_TIMEOUT_INITIAL_DELAY_MS:-15000}
+      ORDER_TIMEOUT_SCAN_DELAY_MS: ${ORDER_TIMEOUT_SCAN_DELAY_MS:-60000}
+      UPLOAD_DIR: /app/uploads
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
+    volumes:
+      - ./data/uploads:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c \"exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /api/actuator/health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3\""
+        ]
+      interval: 15s
+      timeout: 5s
+      start_period: 50s
+      retries: 10
+    depends_on:
+      mysql:
+        condition: service_healthy
+    mem_limit: 512m
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.runtime
+    ports:
+      - "${APP_PORT:-8088}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    mem_limit: 64m
+    restart: unless-stopped
+
+volumes:
+  starx_mysql_data:

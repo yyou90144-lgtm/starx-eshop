@@ -56,9 +56,8 @@ export const resolveProductDetailContent = (product = {}, options = {}) => {
     } else {
       gallery = unique([...(parsed.gallery || []), main])
     }
-    const detailImages = gallery.length
-      ? gallery
-      : unique(parsed.detailImages || [])
+    // 顶部轮播用 gallery；下方「图文详情」必须用 detailImages（小米详情页往下拉的长图）
+    const detailImages = unique(parsed.detailImages || [])
     return {
       gallery: gallery.length ? gallery : [main],
       highlights: Array.isArray(parsed.highlights) ? parsed.highlights.filter(Boolean) : [],
@@ -69,6 +68,8 @@ export const resolveProductDetailContent = (product = {}, options = {}) => {
       specs: Array.isArray(parsed.specs) ? parsed.specs : [],
       colorGalleries,
       defaultColor: parsed.defaultColor || '',
+      learningNote: parsed.learningNote || '',
+      sourceNote: parsed.sourceNote || '',
       structured: true,
     }
   }
@@ -81,6 +82,8 @@ export const resolveProductDetailContent = (product = {}, options = {}) => {
     specs: [],
     colorGalleries: null,
     defaultColor: '',
+    learningNote: '',
+    sourceNote: '',
     structured: false,
   }
 }

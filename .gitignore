@@ -50,13 +50,44 @@ _*.xml
 design-refs/
 tmp/
 
-# Local image/scrape working reports (keep formal security reports only if already tracked)
-security-reports/jd-*
-security-reports/max-*
-security-reports/product-*
-security-reports/watermark-*
-security-reports/android-native-api-tests.json
-security-reports/android-r8-performance-test-*.md
+# Media assets — keep local only, do not upload to GitHub
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.bmp
+*.ico
+*.tif
+*.tiff
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+*.psd
+*.ai
+# Demo / catalog media (local only; do not upload to GitHub)
+**/static/demo/
+**/public/demo/
+**/public/images/
+**/drawable*/**
+*.svg
+*.tgz
+*.zip
+*.7z
+*.rar
+starx-deploy.tgz
+starx-runtime.tgz
+tools/
+
+# Local scrape / helper scripts
+_*.sh
+_*.js
+_*.md
+
+# Local image/scrape working reports
+security-reports/
 
 # Python / npm local
 **/__pycache__/

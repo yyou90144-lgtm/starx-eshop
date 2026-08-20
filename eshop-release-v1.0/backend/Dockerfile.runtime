@@ -1,0 +1,9 @@
+# Runtime-only image (jar built on CI/local; keeps server RAM free)
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY target/eshop-backend-0.0.1-SNAPSHOT.jar app.jar
+ENV JAVA_TOOL_OPTIONS="-Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m"
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --start-period=50s --retries=10 \
+  CMD bash -c "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /api/actuator/health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q 'UP' <&3"
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

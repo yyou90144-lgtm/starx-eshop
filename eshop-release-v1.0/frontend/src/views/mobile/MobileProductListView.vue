@@ -3,8 +3,8 @@ import { computed, onActivated, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { getCategories, getProducts } from '../../api/catalog'
-import { formatMoney } from '../../utils/shop'
 import HotProductRanking from '../../components/catalog/HotProductRanking.vue'
+import { formatMoney } from '../../utils/shop'
 
 const route = useRoute()
 const router = useRouter()
