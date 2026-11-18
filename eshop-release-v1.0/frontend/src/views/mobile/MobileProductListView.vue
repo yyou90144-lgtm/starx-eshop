@@ -6,6 +6,8 @@ import { getCategories, getProducts } from '../../api/catalog'
 import HotProductRanking from '../../components/catalog/HotProductRanking.vue'
 import { formatMoney } from '../../utils/shop'
 
+defineOptions({ name: 'MobileProductListView' })
+
 const route = useRoute()
 const router = useRouter()
 
@@ -153,15 +155,17 @@ watch(
   },
 )
 
-onMounted(async () => {
+onMounted(() => {
   keywordInput.value = keyword.value
-  await loadCategories()
-  await loadProducts({ reset: true, page: 1 })
+  void Promise.all([
+    loadCategories(),
+    loadProducts({ reset: true, page: 1 }),
+  ])
 })
 
 onActivated(() => {
   if (!records.value.length && !loading.value) {
-    loadProducts({ reset: true, page: 1 })
+    void loadProducts({ reset: true, page: 1 })
   }
 })
 </script>

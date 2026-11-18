@@ -89,6 +89,9 @@ _*.md
 # Local image/scrape working reports
 security-reports/
 
+# Local catalog export working files
+/tmp-keep4/
+
 # Python / npm local
 **/__pycache__/
 *.pyc

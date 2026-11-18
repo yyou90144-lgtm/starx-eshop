@@ -1,17 +1,19 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { showImagePreview, showSuccessToast, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { addCartItem } from '../../api/cart'
 import { getProduct } from '../../api/catalog'
 import { recordBrowseHistory } from '../../api/browseHistory'
 import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
-import ProductReviewList from '../../components/review/ProductReviewList.vue'
 import { useAuthStore } from '../../stores/auth'
 import { notifyCartUpdated } from '../../utils/cartBadge'
-import { formatMoney, parseSpecs } from '../../utils/shop'
+import { formatMoney } from '../../utils/shop'
 import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 import { isPlaceholderImage, resolveProductDetailContent } from '../../utils/productDetailContent'
+import { buildSkuSpecIndex, specsEntries, specsLabel } from '../../utils/skuSpecs'
+
+const ProductReviewList = defineAsyncComponent(() => import('../../components/review/ProductReviewList.vue'))
 
 const route = useRoute()
 const router = useRouter()
@@ -28,8 +30,11 @@ const errorMessage = ref('')
 const favorited = ref(false)
 const favoriteLoading = ref(false)
 const swipeKey = ref(0)
+const reviewsVisible = ref(false)
+const reviewsSentinel = ref(null)
 let favoriteRequestSequence = 0
 let requestSequence = 0
+let reviewsObserver = null
 
 const COLOR_SWATCH = {
   暗影黑: '#2b2b2e',
@@ -95,23 +100,16 @@ watch(activeColor, () => {
   imageFailed.value = false
 })
 
-const parseSpecsMap = (specsJson) => {
-  try {
-    return JSON.parse(specsJson) || {}
-  } catch {
-    return {}
-  }
-}
-
-const skuLabel = (sku) => parseSpecs(sku.specsJson)
-  .map((item) => item.value)
-  .join(' / ')
+const skuSpecIndex = computed(() => buildSkuSpecIndex(product.value?.skus))
+const specsOf = (sku) => (sku ? (skuSpecIndex.value.get(sku.id) || {}) : {})
+const skuLabel = (sku) => specsLabel(specsOf(sku))
 
 const skuDimensions = computed(() => {
   const skus = product.value?.skus || []
   if (!skus.length) return []
+  const index = skuSpecIndex.value
   const keys = new Set()
-  skus.forEach((sku) => Object.keys(parseSpecsMap(sku.specsJson)).forEach((k) => keys.add(k)))
+  skus.forEach((sku) => Object.keys(index.get(sku.id) || {}).forEach((k) => keys.add(k)))
   const ordered = [
     ...DIM_ORDER.filter((k) => keys.has(k)),
     ...[...keys].filter((k) => !DIM_ORDER.includes(k)),
@@ -119,7 +117,7 @@ const skuDimensions = computed(() => {
   return ordered.map((key) => {
     const values = []
     skus.forEach((sku) => {
-      const v = parseSpecsMap(sku.specsJson)[key]
+      const v = (index.get(sku.id) || {})[key]
       if (v && !values.includes(v)) values.push(v)
     })
     return {
@@ -138,23 +136,25 @@ const useGroupedSpecs = computed(() => {
 
 const isOptionAvailable = (key, value) => {
   const skus = product.value?.skus || []
+  const index = skuSpecIndex.value
   const attrs = { ...selectedAttrs.value, [key]: value }
   return skus.some((sku) => {
     if (sku.stock <= 0) return false
-    const map = parseSpecsMap(sku.specsJson)
+    const map = index.get(sku.id) || {}
     return Object.entries(attrs).every(([k, v]) => !v || map[k] === v)
   })
 }
 
 const findSkuByAttrs = (attrs) => {
   const skus = product.value?.skus || []
+  const index = skuSpecIndex.value
   const exact = skus.find((sku) => {
-    const map = parseSpecsMap(sku.specsJson)
+    const map = index.get(sku.id) || {}
     return Object.entries(attrs).every(([k, v]) => map[k] === v)
   })
   if (exact) return exact
   const scored = skus.map((sku) => {
-    const map = parseSpecsMap(sku.specsJson)
+    const map = index.get(sku.id) || {}
     let score = 0
     Object.entries(attrs).forEach(([k, v]) => {
       if (map[k] === v) score += 1
@@ -182,7 +182,7 @@ const selectAttr = (key, value) => {
     const partial = { [key]: value }
     sku = findSkuByAttrs(partial)
     if (sku) {
-      selectedAttrs.value = { ...parseSpecsMap(sku.specsJson) }
+      selectedAttrs.value = { ...specsOf(sku) }
       selectedSkuId.value = sku.id
       quantity.value = 1
       return
@@ -190,7 +190,7 @@ const selectAttr = (key, value) => {
     showToast('该规格暂时无货')
     return
   }
-  selectedAttrs.value = { ...parseSpecsMap(sku.specsJson) }
+  selectedAttrs.value = { ...specsOf(sku) }
   selectedSkuId.value = sku.id
   quantity.value = 1
 }
@@ -201,7 +201,7 @@ const selectSku = (sku) => {
     return
   }
   selectedSkuId.value = sku.id
-  selectedAttrs.value = { ...parseSpecsMap(sku.specsJson) }
+  selectedAttrs.value = { ...specsOf(sku) }
   quantity.value = Math.max(1, Math.min(quantity.value, Math.min(sku.stock, 99)))
 }
 
@@ -238,7 +238,8 @@ const loadProduct = async () => {
     const skus = data.skus || []
     const firstAvailable = skus.find((sku) => sku.stock > 0) || skus[0]
     selectedSkuId.value = firstAvailable ? firstAvailable.id : null
-    selectedAttrs.value = firstAvailable ? { ...parseSpecsMap(firstAvailable.specsJson) } : {}
+    const index = buildSkuSpecIndex(skus)
+    selectedAttrs.value = firstAvailable ? { ...(index.get(firstAvailable.id) || {}) } : {}
     if (auth.isLoggedIn) {
       void loadFavoriteStatus(data.id)
       void recordBrowseQuietly(data.id)
@@ -371,7 +372,42 @@ const goCart = () => {
   router.push({ name: 'mobile-cart' })
 }
 
-watch(() => route.params.id, loadProduct, { immediate: true })
+const setupReviewsObserver = () => {
+  reviewsObserver?.disconnect()
+  reviewsObserver = null
+  if (reviewsVisible.value) return
+  const el = reviewsSentinel.value
+  if (!el || typeof IntersectionObserver === 'undefined') {
+    reviewsVisible.value = true
+    return
+  }
+  reviewsObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      reviewsVisible.value = true
+      reviewsObserver?.disconnect()
+      reviewsObserver = null
+    }
+  }, { rootMargin: '240px 0px' })
+  reviewsObserver.observe(el)
+}
+
+watch(() => route.params.id, () => {
+  reviewsVisible.value = false
+  void loadProduct()
+}, { immediate: true })
+
+watch(reviewsSentinel, () => {
+  setupReviewsObserver()
+})
+
+onMounted(() => {
+  setupReviewsObserver()
+})
+
+onUnmounted(() => {
+  reviewsObserver?.disconnect()
+  reviewsObserver = null
+})
 </script>
 
 <template>
@@ -510,7 +546,7 @@ watch(() => route.params.id, loadProduct, { immediate: true })
           </div>
         </template>
         <div v-if="selectedSku" class="selected-specs">
-          <span v-for="item in parseSpecs(selectedSku.specsJson)" :key="item.key">
+          <span v-for="item in specsEntries(specsOf(selectedSku))" :key="item.key">
             <b>{{ DIM_LABEL[item.key] || item.key }}</b>{{ item.value }}
           </span>
         </div>
@@ -572,7 +608,9 @@ watch(() => route.params.id, loadProduct, { immediate: true })
         </div>
       </section>
 
-      <ProductReviewList :product-id="product.id" :page-size="5" />
+      <div ref="reviewsSentinel">
+        <ProductReviewList v-if="reviewsVisible" :product-id="product.id" :page-size="5" />
+      </div>
 
       <div class="service-row">
         <span>模拟支付</span>

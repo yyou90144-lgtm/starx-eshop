@@ -6,6 +6,8 @@ import { cancelOrder, confirmOrder, getOrders } from '../../api/order'
 import { formatDateTime, formatMoney, orderStatusInfo } from '../../utils/shop'
 import { productImageSrc, restoreProductImage } from '../../utils/productVisual'
 
+defineOptions({ name: 'MobileOrdersView' })
+
 const router = useRouter()
 const orders = ref([])
 const current = ref(1)

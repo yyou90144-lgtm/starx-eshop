@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getHotProducts, getProducts } from '../../api/catalog'
 import { formatMoney } from '../../utils/shop'
@@ -21,6 +21,19 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  /** Parent owns the fetch; skip self-request even while items are still empty. */
+  external: {
+    type: Boolean,
+    default: false,
+  },
+  items: {
+    type: Array,
+    default: () => [],
+  },
+  externalLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const router = useRouter()
@@ -28,6 +41,7 @@ const loading = ref(false)
 const products = ref([])
 const errorMessage = ref('')
 const usingFallback = ref(false)
+const externalMode = computed(() => props.external)
 
 const title = computed(() => (
   usingFallback.value ? '人气推荐' : `近 ${props.days} 天热销榜`
@@ -96,22 +110,34 @@ const loadFallback = async () => {
   }))
 }
 
+const normalizeItems = (list = []) => (Array.isArray(list) ? list : []).map((item) => ({
+  ...item,
+  productId: item.productId ?? item.id,
+  name: displayName(item.name || item.productName),
+  salesQuantity: numericValue(item.salesQuantity, item.soldQuantity, item.quantity),
+  minPrice: numericValue(item.minPrice, item.price),
+  imageFailed: Boolean(item.imageFailed),
+  fallback: Boolean(item.fallback),
+}))
+
+const applyExternalItems = () => {
+  usingFallback.value = (props.items || []).some((item) => item?.fallback)
+  products.value = normalizeItems(props.items).slice(0, props.limit)
+  errorMessage.value = ''
+}
+
 const load = async () => {
+  if (externalMode.value) {
+    applyExternalItems()
+    return
+  }
   if (loading.value) return
   loading.value = true
   errorMessage.value = ''
   usingFallback.value = false
   try {
     const list = await getHotProducts({ days: props.days, limit: props.limit })
-    const ranked = (Array.isArray(list) ? list : []).map((item) => ({
-      ...item,
-      productId: item.productId ?? item.id,
-      name: displayName(item.name || item.productName),
-      salesQuantity: numericValue(item.salesQuantity, item.soldQuantity, item.quantity),
-      minPrice: numericValue(item.minPrice, item.price),
-      imageFailed: false,
-      fallback: false,
-    }))
+    const ranked = normalizeItems(list)
     if (ranked.length) {
       products.value = ranked
       return
@@ -137,6 +163,18 @@ const openProduct = (id) => {
   })
 }
 
+const showLoading = computed(() => (
+  externalMode.value ? props.externalLoading && !products.value.length : loading.value && !products.value.length
+))
+
+watch(
+  () => props.items,
+  () => {
+    if (externalMode.value) applyExternalItems()
+  },
+  { deep: true },
+)
+
 onMounted(load)
 </script>
 
@@ -150,7 +188,7 @@ onMounted(load)
       <small v-else>{{ subtitle }}</small>
     </header>
 
-    <div v-if="loading && !products.length" class="loading-list">
+    <div v-if="showLoading" class="loading-list">
       <span v-for="index in Math.min(limit, 5)" :key="index" />
     </div>
 

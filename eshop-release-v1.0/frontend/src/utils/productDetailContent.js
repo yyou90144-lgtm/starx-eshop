@@ -2,6 +2,12 @@ import { productImageSrc } from './productVisual'
 
 const PLACEHOLDER = '/api/demo/products/placeholder-blank.svg'
 
+const detailParseCache = {
+  productId: null,
+  detailRaw: null,
+  parsed: null,
+}
+
 const safeParse = (raw) => {
   if (!raw || typeof raw !== 'string') return null
   const text = raw.trim()
@@ -13,6 +19,23 @@ const safeParse = (raw) => {
   } catch {
     return null
   }
+}
+
+const getParsedDetail = (product = {}) => {
+  const productId = product.id ?? null
+  const detailRaw = product.detail ?? null
+  if (
+    productId != null
+    && productId === detailParseCache.productId
+    && detailRaw === detailParseCache.detailRaw
+  ) {
+    return detailParseCache.parsed
+  }
+  const parsed = safeParse(detailRaw)
+  detailParseCache.productId = productId
+  detailParseCache.detailRaw = detailRaw
+  detailParseCache.parsed = parsed
+  return parsed
 }
 
 const unique = (list = []) => {
@@ -40,7 +63,7 @@ const unique = (list = []) => {
  * @param {{ color?: string }} [options]
  */
 export const resolveProductDetailContent = (product = {}, options = {}) => {
-  const parsed = safeParse(product.detail)
+  const parsed = getParsedDetail(product)
   const main = productImageSrc(product) || PLACEHOLDER
   const preferColor = options.color || ''
 

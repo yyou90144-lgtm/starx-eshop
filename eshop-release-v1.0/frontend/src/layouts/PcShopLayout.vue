@@ -1,40 +1,16 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCart } from '../api/cart'
 import { useAuthStore } from '../stores/auth'
-import { CART_UPDATED_EVENT } from '../utils/cartBadge'
+import { useCartBadgeStore } from '../stores/cartBadge'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+const cartBadgeStore = useCartBadgeStore()
 
 const keyword = ref('')
-const cartCount = ref(0)
-let cartRequestSequence = 0
-
-const cartBadge = computed(() => {
-  if (cartCount.value <= 0) return ''
-  return cartCount.value > 99 ? '99+' : String(cartCount.value)
-})
-
-const loadCartCount = async () => {
-  const requestId = ++cartRequestSequence
-  if (!auth.isLoggedIn) {
-    cartCount.value = 0
-    return
-  }
-  try {
-    const items = await getCart()
-    if (requestId !== cartRequestSequence || !auth.isLoggedIn) return
-    cartCount.value = (Array.isArray(items) ? items : []).reduce(
-      (total, item) => total + Math.max(0, Number(item.quantity) || 0),
-      0,
-    )
-  } catch {
-    if (requestId === cartRequestSequence) cartCount.value = 0
-  }
-}
+const cartBadge = computed(() => cartBadgeStore.badge)
 
 const search = async () => {
   const value = keyword.value.trim()
@@ -46,7 +22,7 @@ const search = async () => {
 
 const logout = async () => {
   await auth.signOut()
-  cartCount.value = 0
+  cartBadgeStore.reset()
   router.push({ name: 'pc-home' })
 }
 
@@ -59,13 +35,8 @@ const goLogin = () => {
 
 onMounted(() => {
   keyword.value = typeof route.query.keyword === 'string' ? route.query.keyword : ''
-  void loadCartCount()
-  window.addEventListener(CART_UPDATED_EVENT, loadCartCount)
-})
-
-onUnmounted(() => {
-  cartRequestSequence += 1
-  window.removeEventListener(CART_UPDATED_EVENT, loadCartCount)
+  cartBadgeStore.ensureListener()
+  void cartBadgeStore.refresh()
 })
 
 watch(
@@ -78,7 +49,7 @@ watch(
 watch(
   () => auth.token,
   () => {
-    void loadCartCount()
+    void cartBadgeStore.refresh()
   },
 )
 </script>

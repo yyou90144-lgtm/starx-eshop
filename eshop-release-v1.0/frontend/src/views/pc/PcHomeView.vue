@@ -10,6 +10,8 @@ const categories = ref([])
 const categoryLoading = ref(false)
 const dealProducts = ref([])
 const hotPreview = ref([])
+const hotRankingItems = ref([])
+const hotRankingLoading = ref(false)
 const dealProductsError = ref(false)
 const hotPreviewError = ref(false)
 const currentBanner = ref(0)
@@ -109,9 +111,10 @@ const loadCategories = async () => {
 }
 
 const loadDeals = async () => {
+  hotRankingLoading.value = true
   const [pageResult, hotResult] = await Promise.allSettled([
     getProducts({ current: 1, size: 8 }),
-    getHotProducts({ days: 30, limit: 3 }),
+    getHotProducts({ days: 30, limit: 5 }),
   ])
 
   let list = []
@@ -134,20 +137,27 @@ const loadDeals = async () => {
   }
 
   if (hotResult.status === 'fulfilled') {
-    hotPreview.value = (hotResult.value || []).map((item) => ({
+    const ranked = (hotResult.value || []).map((item) => ({
       ...item,
+      productId: item.productId ?? item.id,
       name: displayName(item.name),
       imageFailed: false,
       fallback: false,
     }))
+    hotRankingItems.value = ranked
+    hotPreview.value = ranked.slice(0, 3)
   } else {
-    hotPreview.value = list.slice(0, 3).map((product) => ({
+    const fallback = list.slice(0, 5).map((product) => ({
       ...product,
       productId: product.id,
       salesQuantity: null,
       fallback: true,
+      imageFailed: false,
     }))
+    hotRankingItems.value = fallback
+    hotPreview.value = fallback.slice(0, 3)
   }
+  hotRankingLoading.value = false
 }
 
 const startBanner = () => {
@@ -211,7 +221,13 @@ watch(() => banners.value.length, (length) => {
       </aside>
 
       <div class="hero-banner" @mouseenter="stopBanner" @mouseleave="startBanner">
-        <img class="hero-image" :src="activeBanner.image" alt="精选商品场景" />
+        <img
+          class="hero-image"
+          :src="activeBanner.image"
+          alt="精选商品场景"
+          fetchpriority="high"
+          decoding="async"
+        />
         <div class="hero-shade" aria-hidden="true"></div>
         <div class="hero-copy">
           <span class="hero-badge">{{ activeBanner.badge }}</span>
@@ -243,6 +259,8 @@ watch(() => banners.value.length, (length) => {
               v-if="!item.imageFailed"
               :src="productImageSrc(item)"
               :alt="item.name"
+              loading="lazy"
+              decoding="async"
               @error="(event) => { if (event?.currentTarget?.dataset?.fallbackApplied === 'true') item.imageFailed = true; else restoreProductImage(event, item) }"
             />
             <span v-else class="deal-fallback">STARX</span>
@@ -284,7 +302,13 @@ watch(() => banners.value.length, (length) => {
         </div>
         <p>按已支付、已发货和已完成订单销量排序</p>
       </div>
-      <HotProductRanking :limit="5" :show-header="false" />
+      <HotProductRanking
+        external
+        :limit="5"
+        :show-header="false"
+        :items="hotRankingItems"
+        :external-loading="hotRankingLoading"
+      />
     </section>
 
     <section class="home-guides">
